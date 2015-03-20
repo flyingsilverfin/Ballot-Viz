@@ -21,6 +21,12 @@ FREE_FILL_COLOR = "none"
 FREE_FILL_OPACITY = "0"
 FREE_OUTLINE_COLOR = "#000000"
 FREE_OUTLINE_OPACITY = "1"
+styleMapping = {
+	"fill:" : [OCCUPIED_COLOR, FREE_FILL_COLOR],
+	"fill-opacity:" : [OCCUPIED_OPACITY, FREE_FILL_OPACITY],
+	"stroke:" : [OCCUPIED_COLOR, FREE_OUTLINE_COLOR],
+	"stroke-opacity:" : [OCCUPIED_OPACITY, FREE_OUTLINE_OPACITY]
+}
 
 
 
@@ -196,6 +202,8 @@ class SVGUpdater:
 							print "EXCEPTION CONVERTING " + id + " INTO BALLOT ROOM ID"
 							#there should be some kind of break from the normal flow here
 							#that would be good style but for now i'm just trying to get something to work
+					
+						"""
 						#have to adjust the style depending on the situation
 						#following could be cut in half by getting rid of overall IF and using inline if's to place the colors
 						#also need to combine this with checking to make sure each property is actually found (maybe boolean list)
@@ -221,6 +229,24 @@ class SVGUpdater:
 										styles[j] = "stroke:"+FREE_OUTLINE_COLOR
 									if "stroke-opacity:" in styles[j]:
 										styles[j] = "stroke-opacity:" + FREE_OUTLINE_OPACITY
+						"""
+
+						# have to adjust the styles depending on the situation
+						if self.ballotDocument.hasKey(ballotId):
+							occ = self.ballotDocument.isTaken(ballotId)
+							#need to keep track of which properties have been found/are already there
+							propsFound = dict(zip(styleMapping.keys(), [False] * len(styleMapping)))
+							for j in range(len(styles)):	#iterate through the list of style elements
+								for prop in styleMapping:	#if that property is one we need to change
+									if prop in styles[j]:
+										styles[j] = prop + styleMapping[prop][0 if occ else 1] #adjust property
+										propsFound[prop] = True	#record we have changed it
+
+							for prop in propsFound:	#now we need to add all the properties that weren't present already
+								if not propsFound[prop]:
+									#insert into the middle of styles because end and beginning have things like "
+									styles.insert(int(len(styles)/2), prop + styleMapping[prop][0 if occ else 1])
+							
 							styles[-1] += "\"\n"
 						else:
 							print "room not found in BallotSpreadsheet: " +ballotId
