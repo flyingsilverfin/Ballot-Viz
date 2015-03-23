@@ -21,6 +21,7 @@ FREE_FILL_COLOR = "none"
 FREE_FILL_OPACITY = "0"
 FREE_OUTLINE_COLOR = "#000000"
 FREE_OUTLINE_OPACITY = "1"
+
 styleMapping = {
 	"fill:" : [OCCUPIED_COLOR, FREE_FILL_COLOR],
 	"fill-opacity:" : [OCCUPIED_OPACITY, FREE_FILL_OPACITY],
@@ -176,19 +177,23 @@ class SVGUpdater:
 					else: #just finished reading a path
 						pathElement = dataBlock
 						styleRow = -1
-						styleFound = False
 						idRow = -1
-						idFound = False
+						#The following are here from when I wanted to check whether these events are already added
+						#now assuming they aren't. will write a README
+						#mouseoutRow = -1
+						#mouseoverRow = -1
 						print "------------------"
 						for j in range(len(pathElement)):
 							print pathElement[j]
 
-							if "style=" in pathElement[j] and not styleFound:
+							if "style=" in pathElement[j] and styleRow == -1:
 								styleRow = j
-								styleFoun = True
-							if "id=" in pathElement[j] and not idFound:
+							if "id=" in pathElement[j] and idRow == -1:
 								idRow = j
-								idFound = True
+							if "onmouseout=" in pathElement[j] and mouseoutRow == -1:
+								mouseoutRow = j
+							if "onmouseover=" in pathElement[j] and mouseoverRow == -1:
+								mouseoverRow = j
 						#now we know where the style and id are
 						id = pathElement[idRow].split("\"")[-2]
 						print "IdRow: " + str(idRow) + ", ID: " + id
@@ -231,6 +236,7 @@ class SVGUpdater:
 										styles[j] = "stroke-opacity:" + FREE_OUTLINE_OPACITY
 						"""
 
+						#---begin adjust styles---
 						# have to adjust the styles depending on the situation
 						if self.ballotDocument.hasKey(ballotId):
 							occ = self.ballotDocument.isTaken(ballotId)
@@ -248,19 +254,26 @@ class SVGUpdater:
 									styles.insert(int(len(styles)/2), prop + styleMapping[prop][0 if occ else 1])
 							
 							styles[-1] += "\"\n"
+							
+							#add mouseout 
+							pathElement.insert(int(len(pathElement)/2), "onmouseout=\"top.hideTooltip()\"\n")
+							#addmouseover
+							params = "evt,&quot;" + "&quot;,&quot;".join([self.ballotDocument.getOccupier(ballotId), self.ballotDocument.getContractType(ballotId),
+								self.ballotDocument.getRoomCost(ballotId), self.ballotDocument.getRoomType(ballotId)])
+							pathElement.insert(int(len(pathElement)/2), "onmouseover=\"top.showTooltip("+params+"&quot;)\"\n")
 						else:
 							print "room not found in BallotSpreadsheet: " +ballotId
 							#TODO: If it's not found, it might have been edited by accident
 							#might make sense to do similar to above "else" close above
 						print styles
-						#this feels really hacky
+						#this checking if we've lost a " feels really hacky
 						styleString = ";".join(styles)
 						if not styleString.startswith("\""): #if we lost a quote somehow...
 							styleString = "\"" + styleString
 						styleString = stylePrefix + "=" + styleString
 						pathElement[styleRow] = styleString
 						print "styleString: " + styleString
-						#---finished adjusting styles---
+						
 						for k in pathElement:
 							fOut.write(k)
 					dataBlock = [] #RESET in ANY CASE
