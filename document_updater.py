@@ -255,12 +255,6 @@ class SVGUpdater:
 							
 							styles[-1] += "\"\n"
 							
-							#add mouseout 
-							pathElement.insert(int(len(pathElement)/2), "onmouseout=\"top.hideTooltip()\"\n")
-							#addmouseover
-							params = "evt,&quot;" + "&quot;,&quot;".join([self.ballotDocument.getOccupier(ballotId), self.ballotDocument.getContractType(ballotId),
-								self.ballotDocument.getRoomCost(ballotId), self.ballotDocument.getRoomType(ballotId)])
-							pathElement.insert(int(len(pathElement)/2), "onmouseover=\"top.showTooltip("+params+"&quot;)\"\n")
 						else:
 							print "room not found in BallotSpreadsheet: " +ballotId
 							#TODO: If it's not found, it might have been edited by accident
@@ -274,6 +268,19 @@ class SVGUpdater:
 						pathElement[styleRow] = styleString
 						print "styleString: " + styleString
 						
+						#I know this is a repeat of the above if statement but I've separated it for clarity
+						#and because inserting these rows before the style would throw off the styleRow index
+						if self.ballotDocument.hasKey(ballotId):
+							#add mouseout 
+							pathElement.insert(int(len(pathElement)/2), "onmouseout=\"top.hideTooltip()\"\n")
+							#addmouseover
+							params = "evt,&quot;" + "&quot;,&quot;".join([
+								ballotId, self.ballotDocument.getOccupier(ballotId), 
+								self.ballotDocument.getContractType(ballotId), self.ballotDocument.getRoomCost(ballotId), 
+								self.ballotDocument.getRoomType(ballotId)
+							])
+							pathElement.insert(int(len(pathElement)/2), "onmouseover=\"top.showTooltip("+params+"&quot;)\"\n")
+
 						for k in pathElement:
 							fOut.write(k)
 					dataBlock = [] #RESET in ANY CASE

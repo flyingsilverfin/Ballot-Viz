@@ -22,32 +22,44 @@ function zoomOut() {
 	im.width = im.width * 0.9;
 }
 
-function showTooltip(elem, occupant, contractType, rent, roomType) {
+function showTooltip(elem, room, occupant, contractType, rent, roomType) {
 	console.log("showing tooltip");
 	var im = document.getElementById("svg_image");
-	var imLeft = im.getBoundingClientRect().left;
-	var imTop = im.getBoundingClientRect().top - 150;
-	var elemPos = elem.target.getBoundingClientRect();
-	//var posLeft = (imLeft + elemPos.left  + 50) + "px"; //THIS NEEDS TO BE FIXED NEXT!!!
-	var posTop = (imTop + elemPos.top - 50) + "px";
-	var posLeft = (elemPos.left + 50) + "px"; //TODO: replace the hardcoded 50 addition
-	//var posTop = (elemPos.top - 50) + "px";
-	console.log(elemPos);
+	//calculate the offsets of the image initially
+	var sidebar = document.getElementById("sidebar");
+	var sidebarWidth = sidebar.getBoundingClientRect().width;
+	var header = document.getElementById("header_container");
+	var headerHeight = header.getBoundingClientRect().height;
 	
+	var imLeft = im.getBoundingClientRect().left;
+	var imTop = im.getBoundingClientRect().top;
+		
+	document.getElementById("room").innerHTML = room;
 	document.getElementById("occupant").innerHTML = occupant;
 	document.getElementById("contract_type").innerHTML = contractType;
 	rent = document.getElementById("rent").innerHTML = rent;
 	roomType = document.getElementById("room_type").innerHTML = roomType;
-	var toolTip = document.getElementById("tooltip");
-	toolTip.style.left = posLeft;
-	toolTip.style.top = posTop;
-	toolTip.style.display = "inline";
+	
+	var tooltip = document.getElementById("tooltip");
+	
+	var elemPos = elem.target.getBoundingClientRect(); //this is constant depending on zoom level
+	var posLeft = (imLeft + elemPos.left - sidebarWidth  + elemPos.width/2 - tooltip.getBoundingClientRect().width/2) + "px";
+	var posTop = (imTop + elemPos.top - headerHeight - tooltip.getBoundingClientRect().height - 10) + "px";
+	//var posLeft = (elemPos.left + 50) + "px"; //TODO: replace the hardcoded 50 addition
+	//var posTop = (elemPos.top - 50) + "px";
+	
+
+	tooltip.style.left = posLeft;
+	tooltip.style.top = posTop;
+	tooltip.style.visibility = "visible";
+	tooltip.zIndex = "5";
 }
 
 function hideTooltip() {
 	console.log("hiding tooltip");
 	var tooltip = document.getElementById("tooltip");
-	tooltip.style.display = "none";
+	tooltip.style.visibility = "hidden";
+	tooltip.zIndex = "-5";
 }
 
 /*
