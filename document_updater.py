@@ -8,6 +8,13 @@ where <KEY> is the document ID between /d/ and /edit in normal google doc URLS
 so for the 2015 year for instance that <KEY> is 1WO0PucbVNC_6wpWkGG4Ove-hlVGFfNUs3bLj_OW6sGo
 """
 
+"""
+
+TODO:
+	-Currently it seems like the first row of the ballot spreadsheet is being ignored.
+
+"""
+
 import time
 import os
 import urllib2
@@ -15,12 +22,18 @@ import shutil
 import sys
 
 SVG_FILE_NAMES = ["bbc-a-floor-combined.svg", "bbc-b-floor-combined.svg"]
-OCCUPIED_COLOR = "#FF0000"
+OCCUPIED_COLOR = "#FF0000" #red
 OCCUPIED_OPACITY = "0.4"
-FREE_FILL_COLOR = "none"
-FREE_FILL_OPACITY = "0"
-FREE_OUTLINE_COLOR = "#000000"
-FREE_OUTLINE_OPACITY = "1"
+#FREE_FILL_COLOR = "none"
+#FREE_FILL_OPACITY = "0"
+#FREE_OUTLINE_COLOR = "#000000"
+#FREE_OUTLINE_OPACITY = "1"
+FREE_FILL_COLOR = "#00FF00" #green
+FREE_FILL_OPACITY = "0.4"
+FREE_OUTLINE_COLOR = "#00FF00"
+FREE_OUTLINE_OPACITY = "0.4"
+
+
 
 styleMapping = {
 	"fill:" : [OCCUPIED_COLOR, FREE_FILL_COLOR],
@@ -36,12 +49,16 @@ styleMapping = {
 #{"BBC A01" : ['BS', '\xc2\xa3106.96', 'Cooper', 'Domy', 'crsid', 'Easter', ''],
 #...}
 class BallotSpreadsheet:
+	MIN_COLS = 7
 	def __init__(self):
 		self.data = {}
 	def hasKey(self, key):
 		return self.data.has_key(key)
 	
 	def addRow(self, row):
+		print "ADDING ROW TO BALLOT SPREADSHEET: " + str(row)
+		if len(row) < self.MIN_COLS:
+			row = row + [""]*(self.MIN_COLS - len(row)) #make sure there's an appropriate minimum number to index into
 		self.data[row[0]] = row[1:]
 	
 	def hasBeenUpdated(self, row):
@@ -69,6 +86,10 @@ class BallotSpreadsheet:
 	def getRoomType(self, key): #could later add a dict to convert the spreadsheet codes to the text
 		d = self.data[key]
 		return d[0]
+	
+	def getCrisd(self, key):
+		d = self.data[key]
+		return d[4]
 	
 	#this one's tricky because some rooms are term only
 	#could do something that marks rooms if they're not taken yet
@@ -275,7 +296,7 @@ class SVGUpdater:
 							pathElement.insert(int(len(pathElement)/2), "onmouseout=\"top.hideTooltip()\"\n")
 							#addmouseover
 							params = "evt,&quot;" + "&quot;,&quot;".join([
-								ballotId, self.ballotDocument.getOccupier(ballotId), 
+								ballotId, self.ballotDocument.getOccupier(ballotId),  self.ballotDocument.getCrisd(ballotId),
 								self.ballotDocument.getContractType(ballotId), self.ballotDocument.getRoomCost(ballotId), 
 								self.ballotDocument.getRoomType(ballotId)
 							])

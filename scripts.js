@@ -1,13 +1,21 @@
+var currentlySelected = "bbc_a";
+
 function loaded() {
 	var im = document.getElementById("svg_image");
 	var container = document.getElementById("svg_container");
 	im.width = container.clientWidth;
+	var selector = document.getElementById(currentlySelected); //initially selected
+	selector.style.backgroundColor = "white";
 }
 
-function loadSVG(location) {
+function loadSVG(location, siteDivId) {
 	var im = document.getElementById("svg_image");
 	//adding some sort of timestamp forces browser to redraw image, otherwise wouldn't show up half the time
 	im.data = BASE_URL + instanceDirectory + "/res/" + location + "?timestamp" + Date.now();
+	document.getElementById(currentlySelected).style.background = "#E0E0E0";
+	currentlySelected = siteDivId;
+	var selector = document.getElementById(currentlySelected);
+	selector.style.backgroundColor = "white";
 }
 
 function zoomIn() {
@@ -22,8 +30,7 @@ function zoomOut() {
 	im.width = im.width * 0.9;
 }
 
-function showTooltip(elem, room, occupant, contractType, rent, roomType) {
-	console.log("showing tooltip");
+function showTooltip(elem, room, occupant, crisd, contractType, rent, roomType) {
 	var im = document.getElementById("svg_image");
 	//calculate the offsets of the image initially
 	var sidebar = document.getElementById("sidebar");
@@ -36,6 +43,7 @@ function showTooltip(elem, room, occupant, contractType, rent, roomType) {
 		
 	document.getElementById("room").innerHTML = room;
 	document.getElementById("occupant").innerHTML = occupant;
+	document.getElementById("crsid").innerHTML = crisd
 	document.getElementById("contract_type").innerHTML = contractType;
 	rent = document.getElementById("rent").innerHTML = rent;
 	roomType = document.getElementById("room_type").innerHTML = roomType;
@@ -56,7 +64,6 @@ function showTooltip(elem, room, occupant, contractType, rent, roomType) {
 }
 
 function hideTooltip() {
-	console.log("hiding tooltip");
 	var tooltip = document.getElementById("tooltip");
 	tooltip.style.visibility = "hidden";
 	tooltip.zIndex = "-5";
