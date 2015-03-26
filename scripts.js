@@ -11,7 +11,8 @@ function loaded() {
 function loadSVG(location, siteDivId) {
 	var im = document.getElementById("svg_image");
 	//adding some sort of timestamp forces browser to redraw image, otherwise wouldn't show up half the time
-	im.data = BASE_URL + instanceDirectory + "/res/" + location + "?timestamp" + Date.now();
+	//im.data = BASE_URL + instanceDirectory + "/res/" + location + "?timestamp" + Date.now(); //discovered relative paths work like this :D
+	im.data = "res/" + location + "?timestamp" + Date.now(); //CANNOT HAVE A PRECEDING SLASH (think regular unix)
 	document.getElementById(currentlySelected).style.background = "#E0E0E0";
 	currentlySelected = siteDivId;
 	var selector = document.getElementById(currentlySelected);

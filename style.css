@@ -134,7 +134,7 @@ Not having it as pixels prevents people from zooming in to see more detail I thi
 	border-radius: 6px;
 	background: #E0E0E0;
 	background: linear-gradient(to bottom, #6D6D6D 0%, #000 100%) repeat scroll 0% 0% transparent;
-	visibility: "hidden";
+	visibility: hidden;
 	font-size: 1.25em;
 	z-index: 5;
 	padding: 17px;
