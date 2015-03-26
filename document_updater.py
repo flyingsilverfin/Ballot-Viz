@@ -147,11 +147,15 @@ class SVGUpdater:
 			os.mkdir(self.instanceDirName)
 		
 		shutil.copy("scripts.js", self.instanceDirName)
-		self.copyHtmlFile(self.instanceDirName) #have to write a variable into the file
+		shutil.copy("site.html", self.instanceDirName)
+		#self.copyHtmlFile(self.instanceDirName) #have to write a variable into the file #NO LONGER NEEDED
 		shutil.copy("style.css", self.instanceDirName)
 		shutil.copytree("res", os.path.join(self.instanceDirName, "res"))
 		
 		
+	"""
+		Following function is now obsolete
+	"""
 	def copyHtmlFile(self, dirName):
 		fIn = open("site.html")
 		fOut = open(os.path.join(dirName, "site.html"), "w")

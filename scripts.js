@@ -1,4 +1,10 @@
 var currentlySelected = "bbc_a";
+//the following object translates between the site button's ID and that site's URI
+var siteFilenames = {
+	"bbc_a" : 'bbc-a-floor-combined.svg',
+	"bbc_b" : 'bbc-b-floor-combined.svg'
+}
+
 
 function loaded() {
 	var im = document.getElementById("svg_image");
@@ -6,15 +12,38 @@ function loaded() {
 	im.width = container.clientWidth;
 	var selector = document.getElementById(currentlySelected); //initially selected
 	selector.style.backgroundColor = "white";
+	
+	setInterval(update, 5000);	
 }
 
-function loadSVG(location, siteDivId) {
+//thanks to http://stackoverflow.com/questions/247483/http-get-request-in-javascript
+var HttpClient = function() {
+    this.get = function(aUrl, aCallback) {
+        var anHttpRequest = new XMLHttpRequest();
+        anHttpRequest.onreadystatechange = function() { 
+            if (anHttpRequest.readyState == 4 && anHttpRequest.status == 200)
+                aCallback(anHttpRequest.responseText);
+        }
+
+        anHttpRequest.open( "GET", aUrl, true );            
+        anHttpRequest.send( null );
+    }
+}
+
+//this is actually kind of tricky to do
+//TODO
+function update() {
+	
+
+}
+
+function loadSVG(siteName) {
 	var im = document.getElementById("svg_image");
 	//adding some sort of timestamp forces browser to redraw image, otherwise wouldn't show up half the time
 	//im.data = BASE_URL + instanceDirectory + "/res/" + location + "?timestamp" + Date.now(); //discovered relative paths work like this :D
-	im.data = "res/" + location + "?timestamp" + Date.now(); //CANNOT HAVE A PRECEDING SLASH (think regular unix)
+	im.data = "res/" + siteFilenames[siteName] + "?timestamp" + Date.now(); //CANNOT HAVE A PRECEDING SLASH (think regular unix)
 	document.getElementById(currentlySelected).style.background = "#E0E0E0";
-	currentlySelected = siteDivId;
+	currentlySelected = siteName;
 	var selector = document.getElementById(currentlySelected);
 	selector.style.backgroundColor = "white";
 }
@@ -69,12 +98,3 @@ function hideTooltip() {
 	tooltip.style.visibility = "hidden";
 	tooltip.zIndex = "-5";
 }
-
-/*
-function rotateCW() {
-
-}
-
-function rotateCCW() {
-
-}*/
