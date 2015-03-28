@@ -117,15 +117,9 @@ function showTooltip(elem, room, occupant, camCrsid, contractType, rent, roomTyp
 	var tooltip = document.getElementById("tooltip");
 	
 	var elemPos = elem.target.getBoundingClientRect(); //this is constant depending on zoom level
-	//I'm not quite sure why these values are as they are right, now especially the 2* and why the +25 needs to be there
-	//all made sense before having to use embedded iframe... :(
-	var posLeft = (imLeft + elemPos.left + elemPos.width/2 - tooltip.getBoundingClientRect().width/2) + "px";
-	var posTop = (imTop + elemPos.top + headerHeight - 2*tooltip.getBoundingClientRect().height + 25) + "px";
-
-	//var posLeft = (imLeft + elemPos.left - sidebarWidth  + elemPos.width/2 - tooltip.getBoundingClientRect().width/2) + "px";
-	//var posTop = (imTop + elemPos.top - headerHeight - tooltip.getBoundingClientRect().height - 10) + "px";
-	//var posLeft = (elemPos.left + 50) + "px"; //TODO: replace the hardcoded 50 addition
-	//var posTop = (elemPos.top - 50) + "px";
+	
+	var posLeft = (imLeft + elemPos.left - tooltip.getBoundingClientRect().width/2 + elemPos.width/2) + "px";
+	var posTop = (imTop + elemPos.top - tooltip.getBoundingClientRect().height) + "px";
 	
 
 	tooltip.style.left = posLeft;
