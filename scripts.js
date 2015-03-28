@@ -7,13 +7,16 @@ var siteFilenames = {
 
 
 function loaded() {
-	var im = document.getElementById("svg_image");
-	var container = document.getElementById("svg_container");
+	//set a global so we don't have to retrieve it all the time
+	//basically the entire page is static except the embedded iframe
+	embedded = document.getElementById("svg_embed").contentDocument;
+	var im = embedded.getElementById("svg_image");
+	var container = embedded.getElementById("svg_container");
 	im.width = container.clientWidth;
 	var selector = document.getElementById(currentlySelected); //initially selected
 	selector.style.backgroundColor = "white";
 	
-	setInterval(update, 5000);	
+	//setInterval(update, 5000);	
 }
 
 //thanks to http://stackoverflow.com/questions/247483/http-get-request-in-javascript
@@ -37,12 +40,12 @@ function update() {
 }
 
 function loadSVG(siteName) {
-	var im = document.getElementById("svg_image");
+	var im = embedded.getElementById("svg_image");
 	//adding some sort of timestamp forces browser to redraw image, otherwise wouldn't show up half the time
-	//im.data = BASE_URL + instanceDirectory + "/res/" + location + "?timestamp" + Date.now(); //discovered relative paths work like this :D
+	
+	//console.log("setting svg to : " + siteName + ", filename: " +siteFilenames[siteName]);
 	im.data = "res/" + siteFilenames[siteName]; //CANNOT HAVE A PRECEDING SLASH (think regular unix)
 	
-	//im.src = "res/"+siteFilenames[siteName];
 	document.getElementById(currentlySelected).style.background = "#E0E0E0";
 	currentlySelected = siteName;
 	var selector = document.getElementById(currentlySelected);
@@ -50,19 +53,19 @@ function loadSVG(siteName) {
 }
 
 function zoomIn() {
-	var im = document.getElementById("svg_image");
+	var im = embedded.getElementById("svg_image");
 	//im.height = im.height * 1.1;
 	im.width = im.width * 1.1;
 }
 
 function zoomOut() {
-	var im = document.getElementById("svg_image");
+	var im = embedded.getElementById("svg_image");
 	//im.height = im.height * 0.9;
 	im.width = im.width * 0.9;
 }
 
 function showTooltip(elem, room, occupant, camCrsid, contractType, rent, roomType) {
-	var im = document.getElementById("svg_image");
+	var im = embedded.getElementById("svg_image");
 	//calculate the offsets of the image initially
 	var sidebar = document.getElementById("sidebar");
 	var sidebarWidth = sidebar.getBoundingClientRect().width;
@@ -84,8 +87,11 @@ function showTooltip(elem, room, occupant, camCrsid, contractType, rent, roomTyp
 	var tooltip = document.getElementById("tooltip");
 	
 	var elemPos = elem.target.getBoundingClientRect(); //this is constant depending on zoom level
-	var posLeft = (imLeft + elemPos.left - sidebarWidth  + elemPos.width/2 - tooltip.getBoundingClientRect().width/2) + "px";
-	var posTop = (imTop + elemPos.top - headerHeight - tooltip.getBoundingClientRect().height - 10) + "px";
+	var posLeft = (imLeft + elemPos.left + sidebarWidth  + elemPos.width/2 - tooltip.getBoundingClientRect().width/2) + "px";
+	var posTop = (imTop + elemPos.top + headerHeight - tooltip.getBoundingClientRect().height) + "px";
+
+	//var posLeft = (imLeft + elemPos.left - sidebarWidth  + elemPos.width/2 - tooltip.getBoundingClientRect().width/2) + "px";
+	//var posTop = (imTop + elemPos.top - headerHeight - tooltip.getBoundingClientRect().height - 10) + "px";
 	//var posLeft = (elemPos.left + 50) + "px"; //TODO: replace the hardcoded 50 addition
 	//var posTop = (elemPos.top - 50) + "px";
 	
