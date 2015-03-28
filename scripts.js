@@ -5,6 +5,16 @@ var siteFilenames = {
 	"bbc_b" : 'bbc-b-floor-combined.svg'
 }
 
+/*
+	Ok i'm going to start building it toward controlling my own caching...
+	keep track of etags with this object
+*/
+
+var siteEtags = {
+	"bbc_a" : "-1",
+	"bbc_b" : "-1",
+}
+
 
 function loaded() {
 	//set a global so we don't have to retrieve it all the time
@@ -16,7 +26,7 @@ function loaded() {
 	var selector = document.getElementById(currentlySelected); //initially selected
 	selector.style.backgroundColor = "white";
 	
-	//setInterval(update, 5000);	
+	setInterval(update, 5000);	
 }
 
 //thanks to http://stackoverflow.com/questions/247483/http-get-request-in-javascript
@@ -33,17 +43,39 @@ var HttpClient = function() {
     }
 }
 
-//this is actually kind of tricky to do
-//TODO
+//call the callback if the url has changed (200 OK received not 304 no change)
+function ifSiteChanged(site, callback, callbackParams) {
+	var httpRequest = new XMLHttpRequest();
+	var priorEtag = siteEtags[site];
+	httpRequest.onreadystatechange = function() {
+		var newEtag = httpRequest.getResponseHeader("etag");
+		if (newEtag != priorEtag && newEtag != null) {
+			console.log("Different etags, before: " + priorEtag + ", after: " + newEtag);
+			siteEtags[site] = newEtag;
+			//WARNING: THIS IS ***SHIT*** CODE
+			//RIGHT NOW WE CAN ALSO HAVE A PROBLEM IF THE FILE IS UPDATED WHILE WE ARE CHECKING THE ETAG BUT IT WON'T WRITE THE EVEN NEWER ETAG...
+			callback.apply(undefined, callbackParams); //undefined needs ot here for some reason
+		}
+	}
+	httpRequest.open("GET", "res/" + siteFilenames[site], true);
+	httpRequest.send(null);	
+}
+
 function update() {
-	loadSVG(currentlySelected);
+	/*
+		This is inefficient because:
+			If there's a change made, we do two GET requests to the same file
+		However I think that since most of the time there won't be a change made, this is worth it
+	*/
+	//pass in URL to test for change, callback function, and callback function parameters
+	ifSiteChanged(currentlySelected, loadSVG, [currentlySelected]);
 }
 
 function loadSVG(siteName) {
 	var im = embedded.getElementById("svg_image");
-	//adding some sort of timestamp forces browser to redraw image, otherwise wouldn't show up half the time
+	//adding some sort of timestamp forces browser to redraw image, otherwise wouldn't show up half the time (interesting)
+	//...+"?time="+Date.now()
 	
-	//console.log("setting svg to : " + siteName + ", filename: " +siteFilenames[siteName]);
 	im.data = "res/" + siteFilenames[siteName]; //CANNOT HAVE A PRECEDING SLASH (think regular unix)
 	
 	document.getElementById(currentlySelected).style.background = "#E0E0E0";
