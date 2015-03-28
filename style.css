@@ -93,7 +93,7 @@ Not having it as pixels prevents people from zooming in to see more detail I thi
 	background-color: #E0E0E0;
 }
 
-#svg_container {
+#svg_container{
 	width:100%;
 	max-height:100%;
 	overflow:scroll;

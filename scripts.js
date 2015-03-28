@@ -40,9 +40,9 @@ function loadSVG(siteName) {
 	var im = document.getElementById("svg_image");
 	//adding some sort of timestamp forces browser to redraw image, otherwise wouldn't show up half the time
 	//im.data = BASE_URL + instanceDirectory + "/res/" + location + "?timestamp" + Date.now(); //discovered relative paths work like this :D
-	//im.data = "res/" + siteFilenames[siteName]; //CANNOT HAVE A PRECEDING SLASH (think regular unix)
+	im.data = "res/" + siteFilenames[siteName]; //CANNOT HAVE A PRECEDING SLASH (think regular unix)
 	
-	im.src = "res/"+siteFilenames[siteName];
+	//im.src = "res/"+siteFilenames[siteName];
 	document.getElementById(currentlySelected).style.background = "#E0E0E0";
 	currentlySelected = siteName;
 	var selector = document.getElementById(currentlySelected);
