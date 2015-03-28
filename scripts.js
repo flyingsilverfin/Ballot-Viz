@@ -33,15 +33,16 @@ var HttpClient = function() {
 //this is actually kind of tricky to do
 //TODO
 function update() {
-	
-
+	loadSVG(currentlySelected);
 }
 
 function loadSVG(siteName) {
 	var im = document.getElementById("svg_image");
 	//adding some sort of timestamp forces browser to redraw image, otherwise wouldn't show up half the time
 	//im.data = BASE_URL + instanceDirectory + "/res/" + location + "?timestamp" + Date.now(); //discovered relative paths work like this :D
-	im.data = "res/" + siteFilenames[siteName] + "?timestamp" + Date.now(); //CANNOT HAVE A PRECEDING SLASH (think regular unix)
+	//im.data = "res/" + siteFilenames[siteName]; //CANNOT HAVE A PRECEDING SLASH (think regular unix)
+	
+	im.src = "res/"+siteFilenames[siteName];
 	document.getElementById(currentlySelected).style.background = "#E0E0E0";
 	currentlySelected = siteName;
 	var selector = document.getElementById(currentlySelected);
@@ -60,7 +61,7 @@ function zoomOut() {
 	im.width = im.width * 0.9;
 }
 
-function showTooltip(elem, room, occupant, crisd, contractType, rent, roomType) {
+function showTooltip(elem, room, occupant, camCrsid, contractType, rent, roomType) {
 	var im = document.getElementById("svg_image");
 	//calculate the offsets of the image initially
 	var sidebar = document.getElementById("sidebar");
@@ -73,7 +74,9 @@ function showTooltip(elem, room, occupant, crisd, contractType, rent, roomType) 
 		
 	document.getElementById("room").innerHTML = room;
 	document.getElementById("occupant").innerHTML = occupant;
-	document.getElementById("crsid").innerHTML = crisd
+	
+	document.getElementById("crsid").innerHTML = "(" + camCrsid + ")";
+
 	document.getElementById("contract_type").innerHTML = contractType;
 	rent = document.getElementById("rent").innerHTML = rent;
 	roomType = document.getElementById("room_type").innerHTML = roomType;

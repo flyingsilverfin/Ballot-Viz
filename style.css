@@ -25,7 +25,7 @@ h1 {
 	position:absolute;
 	left:0px;
 	width:100%;
-	height:150px;
+	height:140px;
 }
 
 #header_spacer {
@@ -55,7 +55,7 @@ Not having it as pixels prevents people from zooming in to see more detail I thi
 	width:20%;
 	position:absolute;
 	left: 0;
-	top: 154px;
+	top: 144px;
 	background-color: #E0E0E0;
 	bottom:0;
 	overflow:auto;
