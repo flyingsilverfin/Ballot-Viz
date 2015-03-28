@@ -56,9 +56,10 @@ class BallotSpreadsheet:
 		return self.data.has_key(key)
 	
 	def addRow(self, row):
-		print "ADDING ROW TO BALLOT SPREADSHEET: " + str(row)
 		if len(row) < self.MIN_COLS:
 			row = row + [""]*(self.MIN_COLS - len(row)) #make sure there's an appropriate minimum number to index into
+			print "[buffered]",
+		print "ADDING ROW TO BALLOT SPREADSHEET: " + str(row)
 		self.data[row[0]] = row[1:]
 	
 	def hasBeenUpdated(self, row):
@@ -148,6 +149,7 @@ class SVGUpdater:
 		
 		shutil.copy("scripts.js", self.instanceDirName)
 		shutil.copy("site.html", self.instanceDirName)
+		shutil.copy("svgEmbed.html", self.instanceDirName)
 		#self.copyHtmlFile(self.instanceDirName) #have to write a variable into the file #NO LONGER NEEDED
 		shutil.copy("style.css", self.instanceDirName)
 		shutil.copytree("res", os.path.join(self.instanceDirName, "res"))

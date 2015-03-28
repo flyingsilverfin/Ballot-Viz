@@ -94,6 +94,14 @@ Not having it as pixels prevents people from zooming in to see more detail I thi
 	background-color: #E0E0E0;
 }
 
+#embed_container {
+	height:100%;
+	width:100%;
+	margin:0px;
+	background:white;
+	border: 0px;
+}
+
 #svg_embed {
 	width:100%;
 	height:100%;

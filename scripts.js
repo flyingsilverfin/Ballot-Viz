@@ -74,9 +74,7 @@ function update() {
 function loadSVG(siteName) {
 	var im = embedded.getElementById("svg_image");
 	//adding some sort of timestamp forces browser to redraw image, otherwise wouldn't show up half the time (interesting)
-	//...+"?time="+Date.now()
-	
-	im.data = "res/" + siteFilenames[siteName]; //CANNOT HAVE A PRECEDING SLASH (think regular unix)
+	im.data = "res/" + siteFilenames[siteName] + "?time=" + Date.now(); //CANNOT HAVE A PRECEDING SLASH (think regular unix)
 	
 	document.getElementById(currentlySelected).style.background = "#E0E0E0";
 	currentlySelected = siteName;
@@ -119,8 +117,10 @@ function showTooltip(elem, room, occupant, camCrsid, contractType, rent, roomTyp
 	var tooltip = document.getElementById("tooltip");
 	
 	var elemPos = elem.target.getBoundingClientRect(); //this is constant depending on zoom level
-	var posLeft = (imLeft + elemPos.left + sidebarWidth  + elemPos.width/2 - tooltip.getBoundingClientRect().width/2) + "px";
-	var posTop = (imTop + elemPos.top + headerHeight - tooltip.getBoundingClientRect().height) + "px";
+	//I'm not quite sure why these values are as they are right, now especially the 2* and why the +25 needs to be there
+	//all made sense before having to use embedded iframe... :(
+	var posLeft = (imLeft + elemPos.left + elemPos.width/2 - tooltip.getBoundingClientRect().width/2) + "px";
+	var posTop = (imTop + elemPos.top + headerHeight - 2*tooltip.getBoundingClientRect().height + 25) + "px";
 
 	//var posLeft = (imLeft + elemPos.left - sidebarWidth  + elemPos.width/2 - tooltip.getBoundingClientRect().width/2) + "px";
 	//var posTop = (imTop + elemPos.top - headerHeight - tooltip.getBoundingClientRect().height - 10) + "px";
