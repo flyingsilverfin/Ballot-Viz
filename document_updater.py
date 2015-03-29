@@ -9,8 +9,27 @@ so for the 2015 year for instance that <KEY> is 1WO0PucbVNC_6wpWkGG4Ove-hlVGFfNU
 """
 
 """
-TODO:
-	-Currently it seems like the first row of the ballot spreadsheet is being ignored.
+REWRITE IN PROCESS:
+	-deciding how to interweave all the translations and statuses
+	
+	general idea: make no changes to the SVG files
+	have a JSON data file that is read by the client
+	this contains:	
+	{ room_id : 
+		{	roomStatus: "occupied"/"open"/"unavailable"
+			occupier: 	"first last",
+			crsid:	"crsid",
+			contract: 	"contract",
+			rent: "rent",
+			roomType: "room type"
+		}
+		...
+	}
+	the client side then takes this file (only if it has been updated though)
+	parses it and updates each svg element with the onmouseover, onmouseout, style information
+	
+	questions to be answered: different json files for different sites?
+			
 
 """
 
@@ -19,6 +38,7 @@ import os
 import urllib2
 import shutil
 import sys
+import json
 
 SVG_FILE_NAMES = ["bbc-a-floor-combined.svg", "bbc-b-floor-combined.svg"]
 OCCUPIED_COLOR = "#FF0000" #red
@@ -124,10 +144,59 @@ class RoomTranslator:
 	def printContents(self):
 		for key in self.data:
 			print key + ": " + self.data[key]
+			
+			
+"""
+This will be the object that gets translated into JSON and pulled by the client
+Uses SVG room Id's not Ballot room id's
+"""
+class RoomStatus:
+	def __init__(self):
+		self.data = {}
+	def updateRoom(self, room, status):
+		self.data[room] = status
+	def getJSONString(self):
+		return json.dumps(self.data)
+	
+	
+class JSONUpdater:
+	def __init__(self, fileName):
+		self.fileName = fileName
+	def updateJSONFile(self, jsonString):
+		try:
+			os.mkdir("data")
+		except OSError: #directory already exists
+			pass
+		fOut = open(os.path.join("data", self.fileName), w)
+		fOut.write(jsonString)
+		fOut.close()
+	
+class RoomUpdater:
+	BASEURL = "https://docs.google.com/spreadsheets/d/<KEY>/export?gid=0&format=csv"
+	def __init__(self, key, sessionId):		
+		#could make this more robust
+		try:
+			self.instanceDirName = "ballot_" + sessionId
+			os.mkdir(self.instanceDirName)
+		except OSError:
+			self.instanceDirName = "ballot_" + sessionId + "_2"
+			os.mkdir(self.instanceDirName)
+		
+		self.ballotDocument = BallotSpreadsheet()
+		self.roomTranslator = RoomTranslator()
+		self.roomStatus = RoomStatus()
+		self.jsonUpdater = JSONUpdater(self.instanceDirName)
+		self.spreadsheetKey = key
+		self.docUrl = self.BASEURL.replace("<KEY>", key)
+		self.interrupt = False #might need it sometime...
+
+		
+	def updateJSON
+
+	
 
 class SVGUpdater:
 	#shared variables (shouldn't be >1 instance of this though, yet)
-	docUrl = "https://docs.google.com/spreadsheets/d/<KEY>/export?gid=0&format=csv"
 	
 	def __init__(self, key, sessionId):
 		self.ballotDocument = BallotSpreadsheet()
