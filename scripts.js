@@ -49,8 +49,9 @@ function ifSiteChanged(site, callback, callbackParams) {
 	var priorEtag = siteEtags[site];
 	httpRequest.onreadystatechange = function() {
 		var newEtag = httpRequest.getResponseHeader("etag");
-		if (newEtag != priorEtag && newEtag != null) {
-			console.log("Different etags, before: " + priorEtag + ", after: " + newEtag);
+		if (newEtag != priorEtag && httpRequest.readyState == 4 && httpRequest.status == 200) {
+			console.log("Different etags for " + site + ", before: " + priorEtag + ", after: " + newEtag);
+			priorTag = newEtag; //not sure why this would be needed
 			siteEtags[site] = newEtag;
 			//WARNING: THIS IS ***SHIT*** CODE
 			//RIGHT NOW WE CAN ALSO HAVE A PROBLEM IF THE FILE IS UPDATED WHILE WE ARE CHECKING THE ETAG BUT IT WON'T WRITE THE EVEN NEWER ETAG...
@@ -72,12 +73,26 @@ function update() {
 }
 
 function loadSVG(siteName) {
+	console.log("loading: " +siteName);
+	var svgContainer = embedded.getElementById("svg_container");
+	var curScrollTop = svgContainer.scrollTop;
+	var curScrollLeft = svgContainer.scrollLeft;
+	
+	console.log(curScrollTop);
 	var im = embedded.getElementById("svg_image");
 	//adding some sort of timestamp forces browser to redraw image, otherwise wouldn't show up half the time (interesting)
 	im.data = "res/" + siteFilenames[siteName] + "?time=" + Date.now(); //CANNOT HAVE A PRECEDING SLASH (think regular unix)
 	
-	document.getElementById(currentlySelected).style.background = "#E0E0E0";
+	
+	//if we haven't changed sites, go back to same scroll position
+	//should work in theory, DOESN'T WORK IN REALITY
+	if (currentlySelected == siteName) {
+		console.log("restoring scroll pos");
+		svgContainer.scrollTop = curScrollTop;
+		svgContainer.scrollLeft = curScrollLeft;
+	}
 	currentlySelected = siteName;
+
 	var selector = document.getElementById(currentlySelected);
 	selector.style.backgroundColor = "white";
 }
@@ -119,7 +134,7 @@ function showTooltip(elem, room, occupant, camCrsid, contractType, rent, roomTyp
 	var elemPos = elem.target.getBoundingClientRect(); //this is constant depending on zoom level
 	
 	var posLeft = (imLeft + elemPos.left - tooltip.getBoundingClientRect().width/2 + elemPos.width/2) + "px";
-	var posTop = (imTop + elemPos.top - tooltip.getBoundingClientRect().height) + "px";
+	var posTop = (imTop + elemPos.top - tooltip.getBoundingClientRect().height - 10) + "px";
 	
 
 	tooltip.style.left = posLeft;

@@ -172,11 +172,15 @@ class SVGUpdater:
 		
 	def run(self):
 		while not self.interrupt:
+			print "going to update ballot document"
 			changed = self.updateBallotDocument()
+			print "updated ballot document"
 			self.ballotDocument.printContents()
 			print changed
 			if changed:
+				print "rewriting SVG files"
 				self.rewriteSVGFiles()
+				print "done rewriting SVG files"
 			time.sleep(5)
 	
 	def rewriteSVGFiles(self):
