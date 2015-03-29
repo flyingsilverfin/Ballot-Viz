@@ -91,8 +91,9 @@ function loadSVG(siteName) {
 		svgContainer.scrollTop = curScrollTop;
 		svgContainer.scrollLeft = curScrollLeft;
 	}
-	currentlySelected = siteName;
 
+	document.getElementById(currentlySelected).style.backgroundColor = "#E0E0E0";
+	currentlySelected = siteName;
 	var selector = document.getElementById(currentlySelected);
 	selector.style.backgroundColor = "white";
 }
