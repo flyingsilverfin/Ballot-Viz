@@ -6,6 +6,17 @@ It will pull the ballot document from
 https://docs.google.com/spreadsheets/d/<KEY>/export?gid=0&format=csv
 where <KEY> is the document ID between /d/ and /edit in normal google doc URLS
 so for the 2015 year for instance that <KEY> is 1WO0PucbVNC_6wpWkGG4Ove-hlVGFfNUs3bLj_OW6sGo
+
+NOTE:
+This branch represents the old way of updating the svg files, where the server rewrites the svg's
+and then the client regularly pulls them. 
+Issues with this:
+	Lots of bandwidth being used
+	Had to do a whole lot of messy stuff not to make the whole page rerender upon loading new svg in <object> tag
+	Tried briefly but didn't get around scroll reset on loading new svg - would jump each rerender
+	Had to do a messy thing with recording ETAGs and basically doing my own very basic caching for efficiency
+	Bit messy overall
+	
 """
 
 """
