@@ -102,31 +102,29 @@ function updateSvgData(currentSite) {
 }
 
 
-function showTooltip(elem, room, occupant, crisd, contractType, rent, roomType) {
-var im = document.getElementById("svg_image");
-//calculate the offsets of the image initially
-var sidebar = document.getElementById("sidebar");
-var sidebarWidth = sidebar.getBoundingClientRect().width;
-var header = document.getElementById("header_container");
-var headerHeight = header.getBoundingClientRect().height;
-var imLeft = im.getBoundingClientRect().left;
-var imTop = im.getBoundingClientRect().top;
-document.getElementById("room").innerHTML = room;
-document.getElementById("occupant").innerHTML = occupant;
-document.getElementById("crsid").innerHTML = crisd
-document.getElementById("contract_type").innerHTML = contractType;
-rent = document.getElementById("rent").innerHTML = rent;
-roomType = document.getElementById("room_type").innerHTML = roomType;
-var tooltip = document.getElementById("tooltip");
-var elemPos = elem.target.getBoundingClientRect(); //this is constant depending on zoom level
-var posLeft = (imLeft + elemPos.left - sidebarWidth + elemPos.width/2 - tooltip.getBoundingClientRect().width/2) + "px";
-var posTop = (imTop + elemPos.top - headerHeight - tooltip.getBoundingClientRect().height - 10) + "px";
-//var posLeft = (elemPos.left + 50) + "px"; //TODO: replace the hardcoded 50 addition
-//var posTop = (elemPos.top - 50) + "px";
-tooltip.style.left = posLeft;
-tooltip.style.top = posTop;
-tooltip.style.visibility = "visible";
-tooltip.zIndex = "5";
+function showTooltip(elem, room, occupant, crisd, rent, contractType, roomType) {
+	var im = document.getElementById("svg_image");
+	//calculate the offsets of the image initially
+	var sidebar = document.getElementById("sidebar");
+	var sidebarWidth = sidebar.getBoundingClientRect().width;
+	var header = document.getElementById("header_container");
+	var headerHeight = header.getBoundingClientRect().height;
+	var imLeft = im.getBoundingClientRect().left;
+	var imTop = im.getBoundingClientRect().top;
+	document.getElementById("room").innerHTML = room;
+	document.getElementById("occupant").innerHTML = occupant;
+	document.getElementById("crsid").innerHTML = "("+crisd+")";
+	document.getElementById("contract_type").innerHTML = contractType;
+	rent = document.getElementById("rent").innerHTML = rent;
+	roomType = document.getElementById("room_type").innerHTML = roomType;
+	var tooltip = document.getElementById("tooltip");
+	var elemPos = elem.target.getBoundingClientRect(); //this is constant depending on zoom level
+	var posLeft = (imLeft + elemPos.left - sidebarWidth + elemPos.width/2 - tooltip.getBoundingClientRect().width/2) + "px";
+	var posTop = (imTop + elemPos.top - headerHeight - tooltip.getBoundingClientRect().height - 10) + "px";
+	tooltip.style.left = posLeft;
+	tooltip.style.top = posTop;
+	tooltip.style.visibility = "visible";
+	tooltip.zIndex = "5";
 }
 
 function hideTooltip() {

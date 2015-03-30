@@ -171,7 +171,7 @@ class SiteDataHolder:
 			self.data[room] = info
 			
 	def buildStatusList(self, ballotName):
-		if self.ballotDocument.hasKey(ballotName):
+		if self.ballotDocument.hasKey(ballotName) and ballotName != "":
 			info = ["occupied" if self.ballotDocument.isTaken(ballotName) else "available"]
 			info.append(ballotName)
 			info.append(self.ballotDocument.getOccupier(ballotName))
@@ -277,11 +277,15 @@ class RoomUpdater:
 		for line in csv:
 			line = line.strip()
 			row = line.split(",")
+			#this is a big ugly...
 			if len(row) < numCols: #that means we've got one of the strange split up lines
+				if len(info) > 0:
+					info[-1] = info[-1] + row.pop(0) #combine those rows
 				info += row
-				continue
+				if len(info) < numCols:
+					continue
 			if info != []:
-				row = info[:]
+				row = [x.replace("\"", "") for x in info]	#strip out " because they cause problems later
 				info = []
 			if self.ballotDocument.hasKey(row[0]):
 				if self.ballotDocument.hasBeenUpdated(row):
