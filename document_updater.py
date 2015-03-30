@@ -173,14 +173,16 @@ class SiteDataHolder:
 	def buildStatusList(self, ballotName):
 		if self.ballotDocument.hasKey(ballotName):
 			info = ["occupied" if self.ballotDocument.isTaken(ballotName) else "available"]
+			info.append(ballotName)
 			info.append(self.ballotDocument.getOccupier(ballotName))
 			info.append(self.ballotDocument.getCrisd(ballotName))
 			info.append(self.ballotDocument.getRoomCost(ballotName))
 			info.append(self.ballotDocument.getContractType(ballotName))
 			info.append(self.ballotDocument.getRoomType(ballotName))
+			return info
 		else:
-			info = ["unavailable"] + [""]*5 #just to keep a consistent length
-		return info
+			info = ["unavailable"] + [""]*6 #just to keep a consistent length
+			return info
 		
 	#note: this doesn't handle new rooms to the translation file
 	def update(self):
@@ -190,20 +192,24 @@ class SiteDataHolder:
 			info = self.buildStatusList(ballotName)
 			if self.data[room] != info:
 				updated = True
+				self.data[room] = info
 		return updated
 				
 	def getJSONString(self):
+		print self.data
 		return json.dumps(self.data)
 
 
 class JSONFileWriter:
+	def __init__(self, sessionId):
+		self.sessionId = sessionId
 	def writeJSONFile(self, site, jsonString):
 		try:
-			os.mkdir("data")
+			os.mkdir(os.path.join(self.sessionId, "data"))
 		except OSError: #directory already exists
 			pass
-		fOut = open(os.path.join("data", site + ".json"), w)
-		fOut.write(jsonString)
+		fOut = open(os.path.join(self.sessionId, "data", site + ".json"), 'w')
+		fOut.write("'" + jsonString + "'")
 		fOut.close()
 	
 class RoomUpdater:
@@ -216,25 +222,39 @@ class RoomUpdater:
 		except OSError:
 			self.instanceDirName = "ballot_" + sessionId + "_2"
 			os.mkdir(self.instanceDirName)
-		
+	
+		shutil.copy("scripts.js", self.instanceDirName)
+		shutil.copy("site.html", self.instanceDirName)
+		shutil.copy("svgEmbed.html", self.instanceDirName)
+		#self.copyHtmlFile(self.instanceDirName) #have to write a variable into the file #NO LONGER NEEDED
+		shutil.copy("style.css", self.instanceDirName)
+		shutil.copytree("res", os.path.join(self.instanceDirName, "res"))
+	
 		self.ballotDocument = BallotSpreadsheet()
 		self.roomTranslator = RoomTranslator()
-		self.jsonSiteWriter = JSONFileWriter()
+		self.jsonSiteWriter = JSONFileWriter(self.instanceDirName)
 		self.siteJsonHolders = {}
+		#set up site data holders
 		for site in SITES:
 			self.siteJsonHolders[site] = SiteDataHolder(site, self.ballotDocument, self.roomTranslator)
 		self.spreadsheetKey = key
-		self.docUrl = self.BASEURL.replace("<KEY>", key)
+		self.docUrl = RoomUpdater.BASEURL.replace("<KEY>", key)
+		print self.docUrl
 		self.interrupt = False #might need it sometime...
 
 	def run(self):
 		while not self.interrupt:
-			changed = updateBallotDocument()
+			changed = self.updateBallotDocument()
+			
 			if changed:
+				print "=====ballot doc has changed===="
+				self.ballotDocument.printContents()
+				print "\n"
 				for site in self.siteJsonHolders:
 					siteUpdated = self.siteJsonHolders[site].update()
 					if siteUpdated:
 						self.jsonSiteWriter.writeJSONFile(site, self.siteJsonHolders[site].getJSONString())
+				print "\n"
 			time.sleep(5)
 
 	"""
@@ -258,7 +278,7 @@ class RoomUpdater:
 			line = line.strip()
 			row = line.split(",")
 			if len(row) < numCols: #that means we've got one of the strange split up lines
-				info.append(row)
+				info += row
 				continue
 			if info != []:
 				row = info[:]
@@ -275,5 +295,5 @@ class RoomUpdater:
 		
 if __name__ == "__main__":
 	args = sys.argv[1:]
-	svgUpdater = SVGUpdater(args[0], args[1])
+	svgUpdater = RoomUpdater(args[0], args[1])
 	svgUpdater.run()

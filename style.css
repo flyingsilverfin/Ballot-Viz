@@ -84,6 +84,15 @@ Not having it as pixels prevents people from zooming in to see more detail I thi
 	width:90%;
 }
 
+.site .indicator {
+	height: 10px;
+	width: 10px;
+	background-color: lightgreen;
+	position: absolute;
+	left: 90%;
+	top: 1em;
+}
+
 .site h4 {
 	padding: 10px 0px 5px;
 	margin: 0px;

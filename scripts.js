@@ -1,20 +1,20 @@
 var currentlySelected = "bbc_a";
 //the following object translates between the site button's ID and that site's URI
+
 var siteFilenames = {
 	"bbc_a" : 'bbc-a-floor-combined.svg',
 	"bbc_b" : 'bbc-b-floor-combined.svg'
 }
 
-/*
-	Ok i'm going to start building it toward controlling my own caching...
-	keep track of etags with this object
-*/
+var siteData = {
+	"bbc_a" : [],
+	"bbc_b" : []
+}
 
 var siteEtags = {
 	"bbc_a" : "-1",
 	"bbc_b" : "-1",
 }
-
 
 function loaded() {
 	//set a global so we don't have to retrieve it all the time
@@ -25,92 +25,79 @@ function loaded() {
 	im.width = container.clientWidth;
 	var selector = document.getElementById(currentlySelected); //initially selected
 	selector.style.backgroundColor = "white";
-	
-	setInterval(update, 5000);	
+	updateAll();
+	setInterval(updateAll, 5000);	
 }
 
-//thanks to http://stackoverflow.com/questions/247483/http-get-request-in-javascript
-var HttpClient = function() {
-    this.get = function(aUrl, aCallback) {
-        var anHttpRequest = new XMLHttpRequest();
-        anHttpRequest.onreadystatechange = function() { 
-            if (anHttpRequest.readyState == 4 && anHttpRequest.status == 200)
-                aCallback(anHttpRequest.responseText);
-        }
-
-        anHttpRequest.open( "GET", aUrl, true );            
-        anHttpRequest.send( null );
-    }
+function updateAll() {
+	for (site in siteData) {
+		updateSite(site)
+	}
 }
 
-//call the callback if the url has changed (200 OK received not 304 no change)
-function ifSiteChanged(site, callback, callbackParams) {
+function updateSite(site) {
 	var httpRequest = new XMLHttpRequest();
 	var priorEtag = siteEtags[site];
 	httpRequest.onreadystatechange = function() {
 		var newEtag = httpRequest.getResponseHeader("etag");
-		if (newEtag != priorEtag && httpRequest.readyState == 4 && httpRequest.status == 200) {
-			console.log("Different etags for " + site + ", before: " + priorEtag + ", after: " + newEtag);
-			priorTag = newEtag; //not sure why this would be needed
+		if (httpRequest.readyState == 4 && httpRequest.status == 200 && newEtag != priorEtag) {
+			//this means request is ready and the file is new!
 			siteEtags[site] = newEtag;
-			//WARNING: THIS IS ***SHIT*** CODE
-			//RIGHT NOW WE CAN ALSO HAVE A PROBLEM IF THE FILE IS UPDATED WHILE WE ARE CHECKING THE ETAG BUT IT WON'T WRITE THE EVEN NEWER ETAG...
-			callback.apply(undefined, callbackParams); //undefined needs ot here for some reason
+			updateData(site, JSON.parse(httpRequest.response))
 		}
 	}
-	httpRequest.open("GET", "res/" + siteFilenames[site], true);
-	httpRequest.send(null);	
+	httpRequest.open("GET", "data/" + site + ".json", true);
+	httpRequest.send(null);
 }
 
-function update() {
-	/*
-		This is inefficient because:
-			If there's a change made, we do two GET requests to the same file
-		However I think that since most of the time there won't be a change made, this is worth it
-	*/
-	//pass in URL to test for change, callback function, and callback function parameters
-	ifSiteChanged(currentlySelected, loadSVG, [currentlySelected]);
-}
-
-function loadSVG(siteName) {
-	console.log("loading: " +siteName);
-	var svgContainer = embedded.getElementById("svg_container");
-	var curScrollTop = svgContainer.scrollTop;
-	var curScrollLeft = svgContainer.scrollLeft;
-	
-	console.log(curScrollTop);
-	var im = embedded.getElementById("svg_image");
-	//adding some sort of timestamp forces browser to redraw image, otherwise wouldn't show up half the time (interesting)
-	im.data = "res/" + siteFilenames[siteName] + "?time=" + Date.now(); //CANNOT HAVE A PRECEDING SLASH (think regular unix)
-	
-	
-	//if we haven't changed sites, go back to same scroll position
-	//should work in theory, DOESN'T WORK IN REALITY
-	if (currentlySelected == siteName) {
-		console.log("restoring scroll pos");
-		svgContainer.scrollTop = curScrollTop;
-		svgContainer.scrollLeft = curScrollLeft;
+function updateData(site, dataObject) {
+	siteData[site] = dataObject;
+	if (currentlySelected == site) {
+		updateSvgData(dataObject);
+	} else {
+		var notifier = document.getElementById(site).getElementsByClassName("indicator")[0];
+		notifier.style.backgroundColor = "blue";
 	}
-
-	document.getElementById(currentlySelected).style.backgroundColor = "#E0E0E0";
-	currentlySelected = siteName;
-	var selector = document.getElementById(currentlySelected);
-	selector.style.backgroundColor = "white";
 }
 
-function zoomIn() {
-	var im = embedded.getElementById("svg_image");
-	//im.height = im.height * 1.1;
-	im.width = im.width * 1.1;
+//only operates on the current loaded svg
+function updateSvgData(dataObject) {
+	var svg = embedded.getElementById("svg_image").contentDocument;
+	for (room in dataObject) {
+		var r = svg.getElementById(room);
+		roomStatus = dataObject[room][0];
+		if (dataObject[room][0] == "unavailable") {
+			r.style = "";
+			//restyle
+			r.setAttribute("class", "unavailable");
+		} else if ( dataObject[room] == "available") {
+			r.onmouseout = 'top.hideTooltip()';
+			r.onmouseover = 'top.showTooltip(elem,"'+ 
+			'"' + dataObject[room][1] + 
+			'","' + dataObject[room][2] + 
+			'","' + dataObject[room][3] + 
+			'","' + dataObject[room][4] + 
+			'","' + dataObject[room][5] + 
+			'","' + dataObject[room][6] + '")';
+			r.style = "";
+			r.setAttribute("class", "available");
+		} else if (dataObject[room] == "occupied") {
+			r.onmouseout = 'top.hideTooltip()';
+			r.onmouseover = 'top.showTooltip(elem,"'+ 
+			'"' + dataObject[room][1] + 
+			'","' + dataObject[room][2] + 
+			'","' + dataObject[room][3] + 
+			'","' + dataObject[room][4] + 
+			'","' + dataObject[room][5] + 
+			'","' + dataObject[room][6] + '")';
+			r.style = "";
+			r.setAttribute("class", "occupied");
+		}
+	}	
 }
 
-function zoomOut() {
-	var im = embedded.getElementById("svg_image");
-	//im.height = im.height * 0.9;
-	im.width = im.width * 0.9;
-}
 
-function showTooltip(elem, room, occupant, camCrsid, contractType, rent, roomType) {
+function showTooltip(elem, room, occupant, camCrsid, rent, contractType, roomType) {
 	var im = embedded.getElementById("svg_image");
 	//calculate the offsets of the image initially
 	var sidebar = document.getElementById("sidebar");
@@ -144,8 +131,30 @@ function showTooltip(elem, room, occupant, camCrsid, contractType, rent, roomTyp
 	tooltip.zIndex = "5";
 }
 
-function hideTooltip() {
-	var tooltip = document.getElementById("tooltip");
-	tooltip.style.visibility = "hidden";
-	tooltip.zIndex = "-5";
+function zoomIn() {
+	var im = embedded.getElementById("svg_image");
+	//im.height = im.height * 1.1;
+	im.width = im.width * 1.1;
+}
+
+function zoomOut() {
+	var im = embedded.getElementById("svg_image");
+	//im.height = im.height * 0.9;
+	im.width = im.width * 0.9;
+}
+
+
+
+function loadSVG(siteName) {
+	console.log("loading: " +siteName);
+	var svgContainer = embedded.getElementById("svg_container");
+	var im = embedded.getElementById("svg_image");
+	//adding some sort of timestamp forces browser to redraw image, otherwise wouldn't show up half the time (interesting)
+	im.data = "res/" + siteFilenames[siteName]; //CANNOT HAVE A PRECEDING SLASH (think regular unix)
+	var notifier = document.getElementById(site).getElementsByClassName("indicator")[0];
+	notifier.style.backgroundColor = "lightgreen";
+	document.getElementById(currentlySelected).style.backgroundColor = "#E0E0E0";
+	currentlySelected = siteName;
+	var selector = document.getElementById(currentlySelected);
+	selector.style.backgroundColor = "white";
 }
