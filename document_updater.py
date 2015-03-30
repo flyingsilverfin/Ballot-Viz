@@ -209,7 +209,7 @@ class JSONFileWriter:
 		except OSError: #directory already exists
 			pass
 		fOut = open(os.path.join(self.sessionId, "data", site + ".json"), 'w')
-		fOut.write("'" + jsonString + "'")
+		fOut.write(jsonString)
 		fOut.close()
 	
 class RoomUpdater:
@@ -225,7 +225,7 @@ class RoomUpdater:
 	
 		shutil.copy("scripts.js", self.instanceDirName)
 		shutil.copy("site.html", self.instanceDirName)
-		shutil.copy("svgEmbed.html", self.instanceDirName)
+		shutil.copy("svgStyling.css", self.instanceDirName)
 		#self.copyHtmlFile(self.instanceDirName) #have to write a variable into the file #NO LONGER NEEDED
 		shutil.copy("style.css", self.instanceDirName)
 		shutil.copytree("res", os.path.join(self.instanceDirName, "res"))

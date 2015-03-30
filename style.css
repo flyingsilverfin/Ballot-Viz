@@ -88,13 +88,13 @@ Not having it as pixels prevents people from zooming in to see more detail I thi
 	height: 10px;
 	width: 10px;
 	background-color: lightgreen;
-	position: absolute;
+	position: relative;
 	left: 90%;
-	top: 1em;
+	top: -1em;
 }
 
 .site h4 {
-	padding: 10px 0px 5px;
+	padding: 10px 0px 0px;
 	margin: 0px;
 }
 
@@ -107,20 +107,11 @@ Not having it as pixels prevents people from zooming in to see more detail I thi
 	background-color: #E0E0E0;
 }
 
-#embed_container {
+#svg_container {
 	height:100%;
+	max-height:100%;
 	width:100%;
-	margin:0px;
-	background:white;
-	border: 0px;
-}
-
-#svg_embed {
-	width:100%;
-	height:100%;
-	margin:0 0 0 0 ;
-	background:white;
-	border: 0px;
+	overflow:scroll;
 }
 
 .control_button {
@@ -174,13 +165,30 @@ Not having it as pixels prevents people from zooming in to see more detail I thi
 	font-size:1.5em;
 }
 
-
 /*
-#ccw_rotate {
-	float:left;
-	margin:0 2px 0 6px;
+	Styling for changing the rooms
+*/
+
+.unavailable {
+	stroke: #000000;
+	stroke-opacity: 0.4;
+	fill: #000000;
+	fill-opacity: 0.4;
+	stroke-width:2.02276468;
 }
-#cw_rotate {
-	float:left;
-	margin:0 6px 0 2px;
-}*/
+
+.available {
+	stroke: #0000ff;
+	stroke-opacity: 0.4;
+	fill: #0000ff;
+	fill-opacity: 0.4;
+	stroke-width:2.02276468;
+}
+
+.occupied {
+	stroke: #ff0000;
+	stroke-opacity: 0.4;
+	fill: #ff0000;
+	fill-opacity: 0.4;
+	stroke-width:2.02276468;
+}

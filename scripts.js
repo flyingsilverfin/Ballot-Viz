@@ -17,20 +17,16 @@ var siteEtags = {
 }
 
 function loaded() {
-	//set a global so we don't have to retrieve it all the time
-	//basically the entire page is static except the embedded iframe
-	embedded = document.getElementById("svg_embed").contentDocument;
-	var im = embedded.getElementById("svg_image");
-	var container = embedded.getElementById("svg_container");
+	var im = document.getElementById("svg_image");
+	var container = document.getElementById("svg_container");
 	im.width = container.clientWidth;
-	var selector = document.getElementById(currentlySelected); //initially selected
-	selector.style.backgroundColor = "white";
+	loadSVG(currentlySelected);
 	updateAll();
 	setInterval(updateAll, 5000);	
 }
 
 function updateAll() {
-	for (site in siteData) {
+	for (var site in siteData) {
 		updateSite(site)
 	}
 }
@@ -43,17 +39,19 @@ function updateSite(site) {
 		if (httpRequest.readyState == 4 && httpRequest.status == 200 && newEtag != priorEtag) {
 			//this means request is ready and the file is new!
 			siteEtags[site] = newEtag;
-			updateData(site, JSON.parse(httpRequest.response))
+			console.log("RESPONSE: " + httpRequest.response);
+			updatedData(site, JSON.parse(httpRequest.response));
 		}
 	}
+	console.log("getting: data/" + site +".json");
 	httpRequest.open("GET", "data/" + site + ".json", true);
 	httpRequest.send(null);
 }
 
-function updateData(site, dataObject) {
+function updatedData(site, dataObject) {
 	siteData[site] = dataObject;
 	if (currentlySelected == site) {
-		updateSvgData(dataObject);
+		updateSvgData(currentlySelected);
 	} else {
 		var notifier = document.getElementById(site).getElementsByClassName("indicator")[0];
 		notifier.style.backgroundColor = "blue";
@@ -61,16 +59,22 @@ function updateData(site, dataObject) {
 }
 
 //only operates on the current loaded svg
-function updateSvgData(dataObject) {
-	var svg = embedded.getElementById("svg_image").contentDocument;
-	for (room in dataObject) {
+function updateSvgData(currentSite) {
+	var dataObject = siteData[currentSite];
+	console.log(siteData);
+	var svg = document.getElementById("svg_image").contentDocument;
+	for (var room in dataObject) {
+		console.log("Room being processed: " + room);
 		var r = svg.getElementById(room);
-		roomStatus = dataObject[room][0];
-		if (dataObject[room][0] == "unavailable") {
+		var roomStatus = dataObject[room][0];
+		console.log("\tRoom status: " + roomStatus);
+		if (roomStatus == "unavailable") {
+			console.log("\t\t unavailable selected");
 			r.style = "";
 			//restyle
 			r.setAttribute("class", "unavailable");
-		} else if ( dataObject[room] == "available") {
+		} else if ( roomStatus == "available") {
+			console.log("\t\t available selected");
 			r.onmouseout = 'top.hideTooltip()';
 			r.onmouseover = 'top.showTooltip(elem,"'+ 
 			'"' + dataObject[room][1] + 
@@ -81,7 +85,8 @@ function updateSvgData(dataObject) {
 			'","' + dataObject[room][6] + '")';
 			r.style = "";
 			r.setAttribute("class", "available");
-		} else if (dataObject[room] == "occupied") {
+		} else if (roomStatus == "occupied") {
+			console.log("\t\t occupied selected");
 			r.onmouseout = 'top.hideTooltip()';
 			r.onmouseover = 'top.showTooltip(elem,"'+ 
 			'"' + dataObject[room][1] + 
@@ -98,7 +103,7 @@ function updateSvgData(dataObject) {
 
 
 function showTooltip(elem, room, occupant, camCrsid, rent, contractType, roomType) {
-	var im = embedded.getElementById("svg_image");
+	var im = document.getElementById("svg_image");
 	//calculate the offsets of the image initially
 	var sidebar = document.getElementById("sidebar");
 	var sidebarWidth = sidebar.getBoundingClientRect().width;
@@ -131,30 +136,44 @@ function showTooltip(elem, room, occupant, camCrsid, rent, contractType, roomTyp
 	tooltip.zIndex = "5";
 }
 
+function hideTooltip() {
+	var tooltip = document.getElementById("tooltip");
+	tooltip.style.visibility = "hidden";
+	tooltip.zIndex = "-5";
+}
+
 function zoomIn() {
-	var im = embedded.getElementById("svg_image");
+	var im = document.getElementById("svg_image");
 	//im.height = im.height * 1.1;
 	im.width = im.width * 1.1;
 }
 
 function zoomOut() {
-	var im = embedded.getElementById("svg_image");
+	var im = document.getElementById("svg_image");
 	//im.height = im.height * 0.9;
 	im.width = im.width * 0.9;
 }
 
-
-
 function loadSVG(siteName) {
 	console.log("loading: " +siteName);
-	var svgContainer = embedded.getElementById("svg_container");
-	var im = embedded.getElementById("svg_image");
+	var svgContainer = document.getElementById("svg_container");
+	var im = document.getElementById("svg_image");
 	//adding some sort of timestamp forces browser to redraw image, otherwise wouldn't show up half the time (interesting)
 	im.data = "res/" + siteFilenames[siteName]; //CANNOT HAVE A PRECEDING SLASH (think regular unix)
-	var notifier = document.getElementById(site).getElementsByClassName("indicator")[0];
+	var notifier = document.getElementById(siteName).getElementsByClassName("indicator")[0];
 	notifier.style.backgroundColor = "lightgreen";
 	document.getElementById(currentlySelected).style.backgroundColor = "#E0E0E0";
 	currentlySelected = siteName;
 	var selector = document.getElementById(currentlySelected);
 	selector.style.backgroundColor = "white";
+	//we can only do operations on the svg once loaded!
+	im.addEventListener("load", function() {
+		var linkElm = im.contentDocument.createElementNS("http://www.w3.org/1999/xhtml", "link");
+		linkElm.setAttribute("href", "../svgStyling.css");
+		linkElm.setAttribute("type", "text/css");
+		linkElm.setAttribute("rel", "stylesheet");
+		im.contentDocument.getElementsByTagName("defs")[0].appendChild(linkElm);
+		console.log(linkElm);
+		updateSvgData(currentlySelected);
+	});
 }
