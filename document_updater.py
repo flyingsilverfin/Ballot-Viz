@@ -40,26 +40,28 @@ import shutil
 import sys
 import json
 
-SVG_FILE_NAMES = ["bbc-a-floor-combined.svg", "bbc-b-floor-combined.svg"]
-OCCUPIED_COLOR = "#FF0000" #red
-OCCUPIED_OPACITY = "0.4"
+#SVG_FILE_NAMES = ["bbc-a-floor-combined.svg", "bbc-b-floor-combined.svg"]
+SITES = ["bbc_a", "bbc_b"] #these are prefixes in the room_translation.csv file
+#OCCUPIED_COLOR = "#FF0000" #red
+#OCCUPIED_OPACITY = "0.4"
 #FREE_FILL_COLOR = "none"
 #FREE_FILL_OPACITY = "0"
 #FREE_OUTLINE_COLOR = "#000000"
 #FREE_OUTLINE_OPACITY = "1"
-FREE_FILL_COLOR = "#00FF00" #green
-FREE_FILL_OPACITY = "0.4"
-FREE_OUTLINE_COLOR = "#00FF00"
-FREE_OUTLINE_OPACITY = "0.4"
+#FREE_FILL_COLOR = "#00FF00" #green
+#FREE_FILL_OPACITY = "0.4"
+#FREE_OUTLINE_COLOR = "#00FF00"
+#FREE_OUTLINE_OPACITY = "0.4"
 
 
-
+"""
 styleMapping = {
 	"fill:" : [OCCUPIED_COLOR, FREE_FILL_COLOR],
 	"fill-opacity:" : [OCCUPIED_OPACITY, FREE_FILL_OPACITY],
 	"stroke:" : [OCCUPIED_COLOR, FREE_OUTLINE_COLOR],
 	"stroke-opacity:" : [OCCUPIED_OPACITY, FREE_OUTLINE_OPACITY]
 }
+"""
 
 
 
@@ -125,6 +127,7 @@ class BallotSpreadsheet:
 		
 #this takes the csv file as the translation between
 #the ballot document room names and the SVG file room id's
+#intended to be used as a singleton, really
 class RoomTranslator:
 	file = "room_id_translations.csv"
 	def __init__(self):
@@ -144,30 +147,62 @@ class RoomTranslator:
 	def printContents(self):
 		for key in self.data:
 			print key + ": " + self.data[key]
+		
+	#wrote this one as a generator for fun!
+	def getRoomsFromSite(self, site):
+		for room in self.data:
+			if room.startswith(site):
+				yield room
 			
 			
 """
-This will be the object that gets translated into JSON and pulled by the client
-Uses SVG room Id's not Ballot room id's
+This will duplicate all the data. Might rewrite later but good enough for now
 """
-class RoomStatus:
-	def __init__(self):
+class SiteDataHolder:
+	def __init__(self, site, ballotDocument, roomTranslator):
 		self.data = {}
-	def updateRoom(self, room, status):
-		self.data[room] = status
+		self.site = site
+		self.ballotDocument = ballotDocument
+		self.roomTranslator = roomTranslator
+		#build initial data
+		for room in self.roomTranslator.getRoomsFromSite(self.site):
+			ballotName = self.roomTranslator.convertSVGId(room)
+			info = self.buildStatusList(ballotName)
+			self.data[room] = info
+			
+	def buildStatusList(self, ballotName):
+		if self.ballotDocument.hasKey(ballotName):
+			info = ["occupied" if self.ballotDocument.isTaken(ballotName) else "available"]
+			info.append(self.ballotDocument.getOccupier(ballotName))
+			info.append(self.ballotDocument.getCrisd(ballotName))
+			info.append(self.ballotDocument.getRoomCost(ballotName))
+			info.append(self.ballotDocument.getContractType(ballotName))
+			info.append(self.ballotDocument.getRoomType(ballotName))
+		else:
+			info = ["unavailable"] + [""]*5 #just to keep a consistent length
+		return info
+		
+	#note: this doesn't handle new rooms to the translation file
+	def update(self):
+		updated = False
+		for room in self.data:
+			ballotName = self.roomTranslator.convertSVGId(room)
+			info = self.buildStatusList(ballotName)
+			if self.data[room] != info:
+				updated = True
+		return updated
+				
 	def getJSONString(self):
 		return json.dumps(self.data)
-	
-	
-class JSONUpdater:
-	def __init__(self, fileName):
-		self.fileName = fileName
-	def updateJSONFile(self, jsonString):
+
+
+class JSONFileWriter:
+	def writeJSONFile(self, site, jsonString):
 		try:
 			os.mkdir("data")
 		except OSError: #directory already exists
 			pass
-		fOut = open(os.path.join("data", self.fileName), w)
+		fOut = open(os.path.join("data", site + ".json"), w)
 		fOut.write(jsonString)
 		fOut.close()
 	
@@ -184,16 +219,59 @@ class RoomUpdater:
 		
 		self.ballotDocument = BallotSpreadsheet()
 		self.roomTranslator = RoomTranslator()
-		self.roomStatus = RoomStatus()
-		self.jsonUpdater = JSONUpdater(self.instanceDirName)
+		self.jsonSiteWriter = JSONFileWriter()
+		self.siteJsonHolders = {}
+		for site in SITES:
+			self.siteJsonHolders[site] = SiteDataHolder(site, self.ballotDocument, self.roomTranslator)
 		self.spreadsheetKey = key
 		self.docUrl = self.BASEURL.replace("<KEY>", key)
 		self.interrupt = False #might need it sometime...
 
-		
-	def updateJSON
+	def run(self):
+		while not self.interrupt:
+			changed = updateBallotDocument()
+			if changed:
+				for site in self.siteJsonHolders:
+					siteUpdated = self.siteJsonHolders[site].update()
+					if siteUpdated:
+						self.jsonSiteWriter.writeJSONFile(site, self.siteJsonHolders[site].getJSONString())
+			time.sleep(5)
 
-	
+	"""
+	WARNING: this method only works in python2
+	-Returns: boolean
+		true indicates need to update the HTML document
+		false indicates no change in the ballot document
+	-TODO: could change this to return a list of ID's that have been updated
+		would make it more efficient
+	-NOTES:
+		google drive automatically makes the exported csv rectangular
+		that is if one row is 8 long and the others are 4, they are all buffered to be 8 long
+	"""	
+	def updateBallotDocument(self):
+		updated = False
+		response = urllib2.urlopen(self.docUrl)
+		csv = response.readlines()
+		numCols = len(csv[0].split(","))
+		info = []
+		for line in csv:
+			line = line.strip()
+			row = line.split(",")
+			if len(row) < numCols: #that means we've got one of the strange split up lines
+				info.append(row)
+				continue
+			if info != []:
+				row = info[:]
+				info = []
+			if self.ballotDocument.hasKey(row[0]):
+				if self.ballotDocument.hasBeenUpdated(row):
+					self.ballotDocument.update(row)
+					updated = True
+			else:
+				self.ballotDocument.addRow(row)
+				updated = True
+		return updated
+		
 
 class SVGUpdater:
 	#shared variables (shouldn't be >1 instance of this though, yet)
