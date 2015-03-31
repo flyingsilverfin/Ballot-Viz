@@ -48,14 +48,22 @@ function updateSite(site) {
 	httpRequest.send(null);
 }
 
+//this gets called when we know the data has changed
 function updatedData(site, dataObject) {
+	//might be fun to do a scrolling changes thing
+	var diffs = getDifferences(siteData[site], dataObject);
 	siteData[site] = dataObject;
 	if (currentlySelected == site) {
 		updateSvgData(currentlySelected);
 	} else {
 		var notifier = document.getElementById(site).getElementsByClassName("indicator")[0];
 		notifier.style.backgroundColor = "blue";
+		notifier.parentElement.title = "has changes";
 	}
+}
+
+function getDifferences(oldRoomData, newRoomData) {
+	return false;
 }
 
 //only operates on the current loaded svg
@@ -153,6 +161,7 @@ function loadSVG(siteName) {
 	im.data = "res/" + siteFilenames[siteName]; //CANNOT HAVE A PRECEDING SLASH (think regular unix)
 	var notifier = document.getElementById(siteName).getElementsByClassName("indicator")[0];
 	notifier.style.backgroundColor = "lightgreen";
+	notifier.parentElement.title = "up to date";
 	document.getElementById(currentlySelected).style.backgroundColor = "#E0E0E0";
 	currentlySelected = siteName;
 	var selector = document.getElementById(currentlySelected);

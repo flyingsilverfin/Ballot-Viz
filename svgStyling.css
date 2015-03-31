@@ -5,9 +5,9 @@
 
 .unavailable {
 	stroke: #000000;
-	stroke-opacity: 0.4;
+	stroke-opacity: 0;
 	fill: #000000;
-	fill-opacity: 0.4;
+	fill-opacity: 0;
 	stroke-width:2.02276468;
 }
 

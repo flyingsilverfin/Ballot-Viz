@@ -1,36 +1,8 @@
 #!/usr/bin/python
 
 """
-This script will continuously run on the server and update the html file 
-It will pull the ballot document from 
-https://docs.google.com/spreadsheets/d/<KEY>/export?gid=0&format=csv
-where <KEY> is the document ID between /d/ and /edit in normal google doc URLS
-so for the 2015 year for instance that <KEY> is 1WO0PucbVNC_6wpWkGG4Ove-hlVGFfNUs3bLj_OW6sGo
-"""
-
-"""
-REWRITE IN PROCESS:
-	-deciding how to interweave all the translations and statuses
-	
-	general idea: make no changes to the SVG files
-	have a JSON data file that is read by the client
-	this contains:	
-	{ room_id : 
-		{	roomStatus: "occupied"/"open"/"unavailable"
-			occupier: 	"first last",
-			crsid:	"crsid",
-			contract: 	"contract",
-			rent: "rent",
-			roomType: "room type"
-		}
-		...
-	}
-	the client side then takes this file (only if it has been updated though)
-	parses it and updates each svg element with the onmouseover, onmouseout, style information
-	
-	questions to be answered: different json files for different sites?
-			
-
+This script periodically polls a google doc and updates a set of .json files in the ballot_name/data/ folder
+These files get pulled by the client which correspondingly update the svg on the frontend
 """
 
 import time
@@ -40,30 +12,7 @@ import shutil
 import sys
 import json
 
-#SVG_FILE_NAMES = ["bbc-a-floor-combined.svg", "bbc-b-floor-combined.svg"]
 SITES = ["bbc_a", "bbc_b"] #these are prefixes in the room_translation.csv file
-#OCCUPIED_COLOR = "#FF0000" #red
-#OCCUPIED_OPACITY = "0.4"
-#FREE_FILL_COLOR = "none"
-#FREE_FILL_OPACITY = "0"
-#FREE_OUTLINE_COLOR = "#000000"
-#FREE_OUTLINE_OPACITY = "1"
-#FREE_FILL_COLOR = "#00FF00" #green
-#FREE_FILL_OPACITY = "0.4"
-#FREE_OUTLINE_COLOR = "#00FF00"
-#FREE_OUTLINE_OPACITY = "0.4"
-
-
-"""
-styleMapping = {
-	"fill:" : [OCCUPIED_COLOR, FREE_FILL_COLOR],
-	"fill-opacity:" : [OCCUPIED_OPACITY, FREE_FILL_OPACITY],
-	"stroke:" : [OCCUPIED_COLOR, FREE_OUTLINE_COLOR],
-	"stroke-opacity:" : [OCCUPIED_OPACITY, FREE_OUTLINE_OPACITY]
-}
-"""
-
-
 
 #this is fed rows of the spreadsheet
 #data looks like this:
@@ -223,8 +172,13 @@ class RoomUpdater:
 			self.instanceDirName = "ballot_" + sessionId + "_2"
 			os.mkdir(self.instanceDirName)
 	
+		self.spreadsheetKey = key
+		self.docUrl = RoomUpdater.BASEURL.replace("<KEY>", key)
+		print self.docUrl
+
 		shutil.copy("scripts.js", self.instanceDirName)
-		shutil.copy("site.html", self.instanceDirName)
+		self.copyHtmlFile()
+		#shutil.copy("site.html", self.instanceDirName)
 		shutil.copy("svgStyling.css", self.instanceDirName)
 		#self.copyHtmlFile(self.instanceDirName) #have to write a variable into the file #NO LONGER NEEDED
 		shutil.copy("style.css", self.instanceDirName)
@@ -237,11 +191,22 @@ class RoomUpdater:
 		#set up site data holders
 		for site in SITES:
 			self.siteJsonHolders[site] = SiteDataHolder(site, self.ballotDocument, self.roomTranslator)
-		self.spreadsheetKey = key
-		self.docUrl = RoomUpdater.BASEURL.replace("<KEY>", key)
-		print self.docUrl
+
 		self.interrupt = False #might need it sometime...
 
+	def copyHtmlFile(self):
+		fIn = open("site.html")
+		fOut = open(os.path.join(self.instanceDirName, "site.html"), "w")
+		replaced = False #skip checking rest of lines if already replaced
+		for line in fIn:
+			if not replaced and "REPLACE_THIS_WITH_KEY" in line:
+				print "FOUND ----- "
+				line = line.replace("REPLACE_THIS_WITH_KEY", self.spreadsheetKey)
+				replaced = True
+			fOut.write(line)
+		fIn.close()
+		fOut.close()
+	
 	def run(self):
 		while not self.interrupt:
 			changed = self.updateBallotDocument()

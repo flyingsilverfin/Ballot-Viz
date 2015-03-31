@@ -51,6 +51,13 @@ h1 {
 	position: relative;
 }
 
+#link_container {
+	display: inline-block;
+	position: absolute;
+	right: 20px;
+	top: 60px;
+}
+
 
 /*
 Is it better to have the sidebar responsive/as percentage or set in pixels?
@@ -90,7 +97,7 @@ Not having it as pixels prevents people from zooming in to see more detail I thi
 	background-color: lightgreen;
 	position: relative;
 	left: 90%;
-	top: -1em;
+	top: -14px;
 }
 
 .site h4 {
