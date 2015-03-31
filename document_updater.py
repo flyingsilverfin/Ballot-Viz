@@ -208,18 +208,22 @@ class RoomUpdater:
 		fOut.close()
 	
 	def run(self):
+		print "==========Starting=========="
 		while not self.interrupt:
+			print "\n*Going in to update ballot document"
 			changed = self.updateBallotDocument()
-			
+			print "*Finished upating ballot document"
+			print "*Going to update relevant data"
 			if changed:
 				print "=====ballot doc has changed===="
 				self.ballotDocument.printContents()
-				print "\n"
+				print "\n"s
 				for site in self.siteJsonHolders:
 					siteUpdated = self.siteJsonHolders[site].update()
 					if siteUpdated:
 						self.jsonSiteWriter.writeJSONFile(site, self.siteJsonHolders[site].getJSONString())
 				print "\n"
+			print "sleeping 5 sec"
 			time.sleep(5)
 
 	"""

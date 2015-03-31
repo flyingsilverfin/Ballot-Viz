@@ -78,7 +78,7 @@ function updateSvgData(currentSite) {
 		console.log("\tRoom status: " + roomStatus);
 		if (roomStatus == "unavailable") {
 			console.log("\t\t unavailable selected");
-			r.style = "";
+			r.setAttribute("style","");
 			//restyle
 			r.setAttribute("class", "unavailable");
 		} else if ( roomStatus == "available") {
@@ -91,7 +91,7 @@ function updateSvgData(currentSite) {
 			'","' + dataObject[room][4] + 
 			'","' + dataObject[room][5] + 
 			'","' + dataObject[room][6] + '")');
-			r.style = "";
+			r.setAttribute("style", "");
 			r.setAttribute("class", "available");
 		} else if (roomStatus == "occupied") {
 			console.log("\t\t occupied selected");
@@ -103,7 +103,7 @@ function updateSvgData(currentSite) {
 			'","' + dataObject[room][4] + 
 			'","' + dataObject[room][5] + 
 			'","' + dataObject[room][6] + '")');
-			r.style = "";
+			r.setAttribute("style", "");
 			r.setAttribute("class", "occupied");
 		}
 	}	
