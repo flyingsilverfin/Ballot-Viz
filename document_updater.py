@@ -16,7 +16,7 @@ import shutil
 import sys
 import json
 
-SITES = ["bbc_a", "bbc_b"] #these are prefixes in the room_translation.csv file
+SITES = ["bbc_a", "bbc_b", "bbc_c"] #these are prefixes in the room_translation.csv file
 
 #this is fed rows of the spreadsheet
 #data looks like this:

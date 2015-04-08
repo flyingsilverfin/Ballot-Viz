@@ -3,17 +3,20 @@ var currentlySelected = "bbc_a";
 
 var siteFilenames = {
 	"bbc_a" : 'bbc-a-floor-combined.svg',
-	"bbc_b" : 'bbc-b-floor-combined.svg'
+	"bbc_b" : 'bbc-b-floor-combined.svg',
+	"bbc_c" : 'bbc-c-floor-combined.svg'
 }
 
 var siteData = {
 	"bbc_a" : [],
-	"bbc_b" : []
+	"bbc_b" : [],
+	"bbc_c" : []
 }
 
 var siteEtags = {
 	"bbc_a" : "-1",
 	"bbc_b" : "-1",
+	"bbc_c" : "-1"
 }
 
 function loaded() {
