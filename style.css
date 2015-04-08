@@ -105,6 +105,32 @@ Not having it as pixels prevents people from zooming in to see more detail I thi
 	margin: 0px;
 }
 
+
+#updates_pane {
+	width:100%;
+	bottom:0px;
+	position:absolute;
+	height:25%;
+	overflow-y: scroll;
+	overflow-x: hidden;
+	border-top: 5px solid #4E4E4E;
+}
+
+
+.updates_row {
+	border-bottom: 1px solid #4E4E4E;
+	padding: 5px;
+}
+
+.updates_freed {
+	background: rgba(0, 255, 0, 0.15);
+}
+
+.updates_taken {
+	background: rgba(255, 0, 0, 0.15);
+}
+
+
 #main {
 	position:absolute;
 	margin-left:20%;

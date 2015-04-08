@@ -3,6 +3,10 @@
 """
 This script periodically polls a google doc and updates a set of .json files in the ballot_name/data/ folder
 These files get pulled by the client which correspondingly update the svg on the frontend
+
+
+ISSUES:
+	
 """
 
 import time
@@ -40,12 +44,10 @@ class BallotSpreadsheet:
 		
 	def isTaken(self, key):
 		d = self.data[key]
-		if d[2] == "" and d[3] == "":
+		if d[2].strip() == "" and d[3].strip() == "":
 			return False
 		return True
-	
-	#using these individually is going to to be ~5x slower but whatever for now
-	#not being used yet anyway
+
 	def getOccupier(self, key): 
 		d = self.data[key]
 		return d[3] + " " + d[2]
@@ -217,7 +219,7 @@ class RoomUpdater:
 			if changed:
 				print "=====ballot doc has changed===="
 				self.ballotDocument.printContents()
-				print "\n"s
+				print "\n"
 				for site in self.siteJsonHolders:
 					siteUpdated = self.siteJsonHolders[site].update()
 					if siteUpdated:

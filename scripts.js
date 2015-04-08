@@ -27,6 +27,7 @@ function loaded() {
 
 function updateAll() {
 	for (var site in siteData) {
+		console.log("going to update: " + site);
 		updateSite(site)
 	}
 }
@@ -52,6 +53,7 @@ function updateSite(site) {
 function updatedData(site, dataObject) {
 	//might be fun to do a scrolling changes thing
 	var diffs = getDifferences(siteData[site], dataObject);
+	showUpdates(diffs);
 	siteData[site] = dataObject;
 	if (currentlySelected == site) {
 		updateSvgData(currentlySelected);
@@ -62,8 +64,44 @@ function updatedData(site, dataObject) {
 	}
 }
 
+//roomDifferences is structured as:
+//{ room : ["John smith", "BBC A01", "available", "occupied"] ...}
+//			^^ new occupier	^^room	   ^^old status  ^^new status
+function showUpdates(roomDifferences) {
+	console.log("\t\t Going to write up differences");
+	var oldstatus = "";
+	var newstatus = ""; //No idea if this help reduce number of variable allocations in javascript... probably optimizied away
+	var updatesPane = document.getElementById("updates_pane");
+
+	for (var room in roomDifferences) {
+		oldstatus = roomDifferences[room][2];
+		newstatus = roomDifferences[room][3];
+		if (oldstatus == "available" && newstatus == "occupied") {
+			var div = document.createElement("div")
+			div.setAttribute("class", "updates_row updates_taken");
+			div.innerHTML = roomDifferences[room][0]  + " has taken " + roomDifferences[room][1].toUpperCase();
+			updatesPane.insertBefore(div, updatesPane.firstChild);	
+		} else if (oldstatus == "occupied" && newstatus == "available") {
+			var div = document.createElement("div")
+			div.setAttribute("class", "updates_row updates_freed");
+			div.innerHTML = roomDifferences[room][1] + " has become available";
+			updatesPane.insertBefore(div, updatesPane.firstChild);	
+		} else {
+			//do nothing because it's some odd case
+		}
+	}
+}
+
 function getDifferences(oldRoomData, newRoomData) {
-	return false;
+	var changedRooms = {}
+	for (var r in oldRoomData) {
+		var oldData = oldRoomData[r];
+		var newData = newRoomData[r];
+		if (oldData[0] != newData[0]) {
+			changedRooms[r] = [newData[2], newData[1], oldData[0], newData[0]];
+		}
+	}
+	return changedRooms;
 }
 
 //only operates on the current loaded svg
@@ -158,6 +196,10 @@ function loadSVG(siteName) {
 	var svgContainer = document.getElementById("svg_container");
 	var im = document.getElementById("svg_image");
 	//adding some sort of timestamp forces browser to redraw image, otherwise wouldn't show up half the time (interesting)
+	// + "?time="+Date.now()
+	//DECISION: Adding it uses up much more bandwidth for each switch.
+	//	On the other hand it seems to make firefox render the svg properly each time...
+	//	not sure if chrome has this issue
 	im.data = "res/" + siteFilenames[siteName]; //CANNOT HAVE A PRECEDING SLASH (think regular unix)
 	var notifier = document.getElementById(siteName).getElementsByClassName("indicator")[0];
 	notifier.style.backgroundColor = "lightgreen";
