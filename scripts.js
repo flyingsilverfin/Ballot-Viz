@@ -4,19 +4,55 @@ var currentlySelected = "bbc_a";
 var siteFilenames = {
 	"bbc_a" : 'bbc-a-floor-combined.svg',
 	"bbc_b" : 'bbc-b-floor-combined.svg',
-	"bbc_c" : 'bbc-c-floor-combined.svg'
+	"bbc_c" : 'bbc-c-floor-combined.svg',
+	"cs_1" : 'cs-first-floor-combined.svg',
+	"cs_2" : 'cs-second-floor-combined.svg',
+	"boho_a" : 'boho-a-floor-combined.svg',
+	"boho_b" : 'boho-b-floor-combined.svg',
+	"boho_c" : 'boho-c-floor-combined.svg', 
+	"new_build-a" : 'new-build-a-stair_combined.svg',
+	"new_build_e-f-g-h-i-j" : 'new-build-e-f-g-h-i-j-stair_combined.svg',
+	"new_build_k-l-m-n-o-p" : 'new-build-k-l-m-n-o-p-stair_combined.svg',
+	"wyng_a" : 'wyng-a-floor-combined.svg',
+	"wyng_b" : 'wyng-b-floor-combined.svg',
+	"wyng_c" : 'wyng-c-floor-combined.svg',
+	"wyng_d" : 'wyng-d-floor-combined.svg'
 }
 
 var siteData = {
 	"bbc_a" : [],
 	"bbc_b" : [],
-	"bbc_c" : []
+	"bbc_c" : [],
+	"cs_1" : [],
+	"cs_2" : [],
+	"boho_a" : [],
+	"boho_b" : [],
+	"boho_c" : [],
+	"new_build-a" : [],
+	"new_build_e-f-g-h-i-j" : [],
+	"new_build_k-l-m-n-o-p" : [],
+	"wyng_a" : [],
+	"wyng_b" : [],
+	"wyng_c" : [],
+	"wyng_d" :[]
 }
 
 var siteEtags = {
 	"bbc_a" : "-1",
 	"bbc_b" : "-1",
-	"bbc_c" : "-1"
+	"bbc_c" : "-1",
+	"cs_1" :"-1",
+	"cs_2" : "-1",
+	"boho_a" : -1,
+	"boho_b" : -1,
+	"boho_c" : -1,
+	"new_build-a" : -1,
+	"new_build_e-f-g-h-i-j" : -1,
+	"new_build_k-l-m-n-o-p" : -1,
+	"wyng_a" : -1,
+	"wyng_b" : -1,
+	"wyng_c" : -1,
+	"wyng_d" :-1
 }
 
 function loaded() {
@@ -194,7 +230,11 @@ function zoomOut() {
 	im.width = im.width * 0.9;
 }
 
-function loadSVG(siteName) {
+//from parameters is DOM node that is clicked on
+//parent ID is site to load!
+function loadSVG(from) {
+	var siteName = from.parentElement.id;	
+
 	console.log("loading: " +siteName);
 	var svgContainer = document.getElementById("svg_container");
 	var im = document.getElementById("svg_image");

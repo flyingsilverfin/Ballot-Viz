@@ -16,7 +16,12 @@ import shutil
 import sys
 import json
 
-SITES = ["bbc_a", "bbc_b", "bbc_c"] #these are prefixes in the room_translation.csv file
+SITES = [
+	"bbc_a", "bbc_b", "bbc_c","cs_1","cs_2","boho_a", "boho_b", "boho_c", 
+	"new_build_a", "new_build_e", "new_build_f", "new_build_g", "new_build_h", "new_build_i", "new_build_k", "new_build_l",
+		"new_build_m", "new_build_n", "new_build_o", "new_build_p", 
+	"wyng_a" , "wyng_b", "wyng_c", "wyng_d"
+] #these are prefixes in the room_id_translation.csv file
 
 #this is fed rows of the spreadsheet
 #data looks like this:
@@ -27,7 +32,15 @@ class BallotSpreadsheet:
 	def __init__(self):
 		self.data = {}
 	def hasKey(self, key):
-		return self.data.has_key(key)
+		for keys in self.data:
+			if keys.startswith(key):
+				return True
+		return False
+	
+	def getKey(self, key):
+		for k in self.data:
+			if k.startswith(key):
+				return self.data[k]
 	
 	def addRow(self, row):
 		if len(row) < self.MIN_COLS:
@@ -41,34 +54,34 @@ class BallotSpreadsheet:
 	
 	def update(self, row):
 		self.data[row[0]] = row[1:]
-		
+	
 	def isTaken(self, key):
-		d = self.data[key]
+		d = self.getKey(key)
 		if d[2].strip() == "" and d[3].strip() == "":
 			return False
 		return True
 
 	def getOccupier(self, key): 
-		d = self.data[key]
+		d = self.getKey(key)
 		return d[3] + " " + d[2]
 	
 	def getRoomCost(self, key):
-		d = self.data[key]
+		d = self.getKey(key)
 		return d[1]
 	
 	def getRoomType(self, key): #could later add a dict to convert the spreadsheet codes to the text
-		d = self.data[key]
+		d = self.getKey(key)
 		return d[0]
 	
 	def getCrisd(self, key):
-		d = self.data[key]
+		d = self.getKey(key)
 		return d[4]
 	
 	#this one's tricky because some rooms are term only
 	#could do something that marks rooms if they're not taken yet
 	#but have term contract written in (== SET)
 	def getContractType(self, key):
-		d = self.data[key]
+		d = self.getKey(key)
 		return d[5]
 	
 	def printContents(self):
@@ -78,12 +91,12 @@ class BallotSpreadsheet:
 		
 #this takes the csv file as the translation between
 #the ballot document room names and the SVG file room id's
-#intended to be used as a singleton, really
+#intended to be used as a singleton, really but not a big deal otherwise
 class RoomTranslator:
-	file = "room_id_translations.csv"
-	def __init__(self):
+	def __init__(self, roomIdTranslationFile):
+		self.roomIdTranslationFile = roomIdTranslationFile
 		self.data = {}
-		tmp = open(self.file).readlines()
+		tmp = open(self.roomIdTranslationFile).readlines()
 		for line in tmp:
 			d = line.strip().split(",")
 			#do it in reverse for now... not sure which way is better
@@ -96,6 +109,7 @@ class RoomTranslator:
 			raise Exception("ID " + id + " does not exist in ballot sheet")
 		
 	def printContents(self):
+		print "---Printing contents of Room Translator ---"
 		for key in self.data:
 			print key + ": " + self.data[key]
 		
@@ -116,7 +130,11 @@ class SiteDataHolder:
 		self.ballotDocument = ballotDocument
 		self.roomTranslator = roomTranslator
 		#build initial data
+		print "SITE: " + site
+
 		for room in self.roomTranslator.getRoomsFromSite(self.site):
+			print "\tROOM: " + room
+
 			ballotName = self.roomTranslator.convertSVGId(room)
 			info = self.buildStatusList(ballotName)
 			self.data[room] = info
@@ -155,6 +173,8 @@ class JSONFileWriter:
 	def __init__(self, sessionId):
 		self.sessionId = sessionId
 	def writeJSONFile(self, site, jsonString):
+		print "\t\tMaking data file: " + site + ".json"
+
 		try:
 			os.mkdir(os.path.join(self.sessionId, "data"))
 		except OSError: #directory already exists
@@ -164,9 +184,8 @@ class JSONFileWriter:
 		fOut.close()
 	
 class RoomUpdater:
-	BASEURL = "https://docs.google.com/spreadsheets/d/<KEY>/export?gid=0&format=csv"
-	def __init__(self, key, sessionId):		
-		#could make this more robust
+	def __init__(self, csvUrl, sessionId, roomIdTranslationFile):		
+		#could make this more robust easily
 		try:
 			self.instanceDirName = "ballot_" + sessionId
 			os.mkdir(self.instanceDirName)
@@ -174,26 +193,23 @@ class RoomUpdater:
 			self.instanceDirName = "ballot_" + sessionId + "_2"
 			os.mkdir(self.instanceDirName)
 	
-		self.spreadsheetKey = key
-		self.docUrl = RoomUpdater.BASEURL.replace("<KEY>", key)
-		print self.docUrl
+		self.csvUrl = csvUrl
+		self.spreadsheetKey = self.extractDocumentKey(csvUrl)
 
 		shutil.copy("scripts.js", self.instanceDirName)
-		self.copyHtmlFile()
+		self.copyHtmlFile()	#copy and edit on the way
 		#shutil.copy("site.html", self.instanceDirName)
 		shutil.copy("svgStyling.css", self.instanceDirName)
-		#self.copyHtmlFile(self.instanceDirName) #have to write a variable into the file #NO LONGER NEEDED
 		shutil.copy("style.css", self.instanceDirName)
 		shutil.copytree("res", os.path.join(self.instanceDirName, "res"))
 	
 		self.ballotDocument = BallotSpreadsheet()
-		self.roomTranslator = RoomTranslator()
+		self.roomTranslator = RoomTranslator(roomIdTranslationFile)
 		self.jsonSiteWriter = JSONFileWriter(self.instanceDirName)
 		self.siteJsonHolders = {}
 		#set up site data holders
 		for site in SITES:
 			self.siteJsonHolders[site] = SiteDataHolder(site, self.ballotDocument, self.roomTranslator)
-
 		self.interrupt = False #might need it sometime...
 
 	def copyHtmlFile(self):
@@ -209,6 +225,11 @@ class RoomUpdater:
 		fIn.close()
 		fOut.close()
 	
+	def extractDocumentKey(self, csvUrl):
+		path = csvUrl.split('/')
+		loc = path.index('d') + 1
+		return path[loc]
+	
 	def run(self):
 		print "==========Starting=========="
 		while not self.interrupt:
@@ -222,6 +243,7 @@ class RoomUpdater:
 				print "\n"
 				for site in self.siteJsonHolders:
 					siteUpdated = self.siteJsonHolders[site].update()
+					print "Site " + site + " has changed: " + str(siteUpdated)
 					if siteUpdated:
 						self.jsonSiteWriter.writeJSONFile(site, self.siteJsonHolders[site].getJSONString())
 				print "\n"
@@ -241,7 +263,7 @@ class RoomUpdater:
 	"""	
 	def updateBallotDocument(self):
 		updated = False
-		response = urllib2.urlopen(self.docUrl)
+		response = urllib2.urlopen(self.csvUrl)
 		csv = response.readlines()
 		numCols = len(csv[0].split(","))
 		info = []
@@ -270,5 +292,8 @@ class RoomUpdater:
 		
 if __name__ == "__main__":
 	args = sys.argv[1:]
-	svgUpdater = RoomUpdater(args[0], args[1])
+	print sys.argv
+	print len(args)
+	print "Usage: <csvUrl> <sessionId> <room id translation file>"
+	svgUpdater = RoomUpdater(args[0], args[1], args[2])
 	svgUpdater.run()
