@@ -5,6 +5,8 @@ This script periodically polls a google doc and updates a set of .json files in 
 These files get pulled by the client which correspondingly update the svg on the frontend
 
 
+**document_updater2.py has extra options, is more up to date, and should be used (actually forgot what the difference is, used 2 for actual ballot though!**
+
 ISSUES:
 	
 """
