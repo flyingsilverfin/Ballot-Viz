@@ -59,15 +59,15 @@ cs_1_s_8,CS S08
 cs_1_s_8_,
 cs_1_s_9a,
 cs_1_s_9b,
-cs_1_s_10a,CS S10A
-cs_1_s_10b,CS S10B
+cs_1_s_10a,CS S10B
+cs_1_s_10b,CS S10A
 cs_2_s_11,
 cs_2_s_12,CS S12
 cs_2_s_13,
-cs_2_s_14a,CS S14A
-cs_2_s_14b,CS S14B
-cs_2_s_15a,CS S15A
-cs_2_s_15b,CS S15B
+cs_2_s_14a,CS S14B
+cs_2_s_14b,CS S14A
+cs_2_s_15a,CS S15B
+cs_2_s_15b,CS S15A
 cs_2_a_1,CS A01
 cs_2_a_2a,CS A02A
 cs_2_a_2b,CS A02B
@@ -112,16 +112,16 @@ boho_c_9,BH C09
 boho_c_10,BH C10
 boho_c_11,BH C11
 boho_c_12,BH C12
-new_build_a_1,WF  A01
-new_build_a_2,WF  A02
-new_build_a_3,WF  A03
-new_build_a_4,WF  A04
-new_build_a_5,WF  A05
-new_build_a_6,WF  A06
-new_build_a_7,WF  A07
-new_build_a_8,WF  A08
-new_build_a_9,WF  A09
-new_build_a_10,WF  A10
+new_build_a_1,WF A01
+new_build_a_2,WF A02
+new_build_a_3,WF A03
+new_build_a_4,WF A04
+new_build_a_5,WF A05
+new_build_a_6,WF A06
+new_build_a_7,WF A07
+new_build_a_8,WF A08
+new_build_a_9,WF A09
+new_build_a_10,WF A10
 new_build_e_1,WF E01
 new_build_e_2,WF E02
 new_build_e_3,WF E03
@@ -159,6 +159,7 @@ new_build_h_5,WF H05
 new_build_h_6,WF H06
 new_build_h_7,WF H07
 new_build_h_8,WF H08
+new_build_h_9,WF H09
 new_build_i_1,
 new_build_i_2,
 new_build_i_3,
@@ -311,3 +312,8 @@ wyng_d_13,WG D13
 wyng_d_14,WG D14
 wyng_d_15,WG D15
 wyng_d_16,WG D16
+coote_1,CH 01
+coote_2,CH 02
+coote_3,CH 03
+coote_4,CH 04
+coote_5,CH 05

@@ -72,7 +72,12 @@ Not having it as pixels prevents people from zooming in to see more detail I thi
 	bottom:0;
 	overflow:auto;
 	max-width:20%;
-	
+	overflow: hidden;
+}
+
+#sites_container{
+	height:75%;
+	overflow-y: scroll;
 }
 
 .site {
@@ -109,7 +114,6 @@ Not having it as pixels prevents people from zooming in to see more detail I thi
 #updates_pane {
 	width:100%;
 	bottom:0px;
-	position:absolute;
 	height:25%;
 	overflow-y: scroll;
 	overflow-x: hidden;
@@ -199,29 +203,33 @@ Not having it as pixels prevents people from zooming in to see more detail I thi
 	font-size:1.5em;
 }
 
+.detail_text {
+	font-size:0.9em;
+}
+
 /*
 	Styling for changing the rooms
 */
 
 .unavailable {
-	stroke: #000000;
-	stroke-opacity: 0.4;
+	/*stroke: #000000;*/
+	stroke-opacity: 0.0;
 	fill: #000000;
-	fill-opacity: 0.4;
+	fill-opacity: 0.0;
 	stroke-width:2.02276468;
 }
 
 .available {
-	stroke: #0000ff;
-	stroke-opacity: 0.4;
-	fill: #0000ff;
+	/*stroke: #00ff00;*/
+	stroke-opacity: 0.0;
+	fill: #00ff00;
 	fill-opacity: 0.4;
 	stroke-width:2.02276468;
 }
 
 .occupied {
-	stroke: #ff0000;
-	stroke-opacity: 0.4;
+	/*stroke: #ff0000;*/
+	stroke-opacity: 0.0;
 	fill: #ff0000;
 	fill-opacity: 0.4;
 	stroke-width:2.02276468;

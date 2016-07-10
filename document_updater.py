@@ -16,12 +16,18 @@ import shutil
 import sys
 import json
 
+#these are prefixes in the room_id_translation.csv file
+#each prefix generates one .json file in ./data
 SITES = [
-	"bbc_a", "bbc_b", "bbc_c","cs_1","cs_2","boho_a", "boho_b", "boho_c", 
-	"new_build_a", "new_build_e", "new_build_f", "new_build_g", "new_build_h", "new_build_i", "new_build_k", "new_build_l",
-		"new_build_m", "new_build_n", "new_build_o", "new_build_p", 
+	"bbc_a", "bbc_b", "bbc_c",
+	"cs_1", "cs_2",
+	"boho_a", "boho_b", "boho_c", 
+	"new_build_a",
+		"new_build_e", "new_build_f", "new_build_g", "new_build_h", "new_build_i",  "new_build_j_",
+		"new_build_k", "new_build_l", "new_build_m", "new_build_n", "new_build_o", "new_build_p", 
 	"wyng_a" , "wyng_b", "wyng_c", "wyng_d"
-] #these are prefixes in the room_id_translation.csv file
+] 
+	
 
 #this is fed rows of the spreadsheet
 #data looks like this:
@@ -42,7 +48,7 @@ class BallotSpreadsheet:
 			if k.startswith(key):
 				return self.data[k]
 	
-	def addRow(self, row):
+	def addRow(self, row):	
 		if len(row) < self.MIN_COLS:
 			row = row + [""]*(self.MIN_COLS - len(row)) #make sure there's an appropriate minimum number to index into
 			print "[buffered]",
@@ -184,6 +190,8 @@ class JSONFileWriter:
 		fOut.close()
 	
 class RoomUpdater:
+	#2016
+	#https://docs.google.com/spreadsheets/d/1juGIlhvuoUeVkkaxLdFCBlVStPm4psAXO1zx774aFVs/pub?gid=1332293320&single=true&output=csv
 	def __init__(self, csvUrl, sessionId, roomIdTranslationFile):		
 		#could make this more robust easily
 		try:
@@ -277,23 +285,32 @@ class RoomUpdater:
 				info += row
 				if len(info) < numCols:
 					continue
+			
 			if info != []:
 				row = [x.replace("\"", "") for x in info]	#strip out " because they cause problems later
 				info = []
-			if self.ballotDocument.hasKey(row[0]):
-				if self.ballotDocument.hasBeenUpdated(row):
-					self.ballotDocument.update(row)
+				
+			#throw out empty lines
+			if row[0] == '':
+				continue
+			try:
+				if self.ballotDocument.hasKey(row[0]):
+					if self.ballotDocument.hasBeenUpdated(row):
+						self.ballotDocument.update(row)
+						updated = True
+				else:
+					self.ballotDocument.addRow(row)
 					updated = True
-			else:
-				self.ballotDocument.addRow(row)
-				updated = True
+			except KeyError:
+				print "Skipping - key error on line: \n\t" + line
+			
 		return updated
 
-		
+
 if __name__ == "__main__":
 	args = sys.argv[1:]
-	print sys.argv
-	print len(args)
-	print "Usage: <csvUrl> <sessionId> <room id translation file>"
-	svgUpdater = RoomUpdater(args[0], args[1], args[2])
-	svgUpdater.run()
+	if len(args) != 3:
+		print "Usage: <csvUrl> <sessionId> <room id translation file>"
+	else:
+		svgUpdater = RoomUpdater(args[0], args[1], args[2])
+		svgUpdater.run()	

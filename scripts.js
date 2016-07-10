@@ -43,23 +43,23 @@ var siteEtags = {
 	"bbc_c" : "-1",
 	"cs_1" :"-1",
 	"cs_2" : "-1",
-	"boho_a" : -1,
-	"boho_b" : -1,
-	"boho_c" : -1,
-	"new_build-a" : -1,
-	"new_build_e-f-g-h-i-j" : -1,
-	"new_build_k-l-m-n-o-p" : -1,
-	"wyng_a" : -1,
-	"wyng_b" : -1,
-	"wyng_c" : -1,
-	"wyng_d" :-1
+	"boho_a" : "-1",
+	"boho_b" : "-1",
+	"boho_c" : "-1",
+	"new_build-a" : "-1",
+	"new_build_e-f-g-h-i-j" : "-1",
+	"new_build_k-l-m-n-o-p" : "-1",
+	"wyng_a" : "-1",
+	"wyng_b" : "-1",
+	"wyng_c" : "-1",
+	"wyng_d" : "-1"
 }
 
 function loaded() {
 	var im = document.getElementById("svg_image");
 	var container = document.getElementById("svg_container");
 	im.width = container.clientWidth;
-	loadSVG(currentlySelected);
+	loadSVG(document.getElementById(currentlySelected));
 	updateAll();
 	setInterval(updateAll, 5000);	
 }
@@ -233,7 +233,9 @@ function zoomOut() {
 //from parameters is DOM node that is clicked on
 //parent ID is site to load!
 function loadSVG(from) {
-	var siteName = from.parentElement.id;	
+	console.log(from);
+
+	var siteName = from.id;	
 
 	console.log("loading: " +siteName);
 	var svgContainer = document.getElementById("svg_container");
@@ -244,7 +246,7 @@ function loadSVG(from) {
 	//	On the other hand it seems to make firefox render the svg properly each time...
 	//	not sure if chrome has this issue
 	im.data = "res/" + siteFilenames[siteName]; //CANNOT HAVE A PRECEDING SLASH (think regular unix)
-	var notifier = document.getElementById(siteName).getElementsByClassName("indicator")[0];
+	var notifier = document.getElementById(siteName).getElementsByClassName("site_name")[0].getElementsByClassName("indicator")[0];
 	notifier.style.backgroundColor = "lightgreen";
 	notifier.parentElement.title = "up to date";
 	document.getElementById(currentlySelected).style.backgroundColor = "#E0E0E0";
