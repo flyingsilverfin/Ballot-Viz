@@ -49,7 +49,7 @@ def run():
 	config = json.load(open('backend/config/config.json'))
 	ballot_doc_columns = config['ballot_document_columns']
 	name_index = ballot_doc_columns['roomName']
-	start_row = config['start_row']
+
 	year = config['year']
 	name = str(year)
 
