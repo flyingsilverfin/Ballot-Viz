@@ -35,7 +35,7 @@ def to_date(date_string):
 	return datetime.strptime(date_string[:10], '%Y-%m-%d')
 
 def copyIndex(dest, key):
-	fIn = open("../template/index.html")
+	fIn = open("template/index.html")
 	fOut = open(os.path.join(dest, 'index.html', "w"))
 	for line in fIn:
 		if "REPLACE_THIS_WITH_KEY" in line:
@@ -59,7 +59,7 @@ def run():
 
 	# use creds to create a client to interact with the Google Drive API
 	scope = ['https://spreadsheets.google.com/feeds']
-	creds = ServiceAccountCredentials.from_json_keyfile_name('config/google_api_secret.json', scope)
+	creds = ServiceAccountCredentials.from_json_keyfile_name('backend/config/google_api_secret.json', scope)
 	client = gspread.authorize(creds)
 	 
 	# get the most recently edited spreadsheet as the current one
@@ -74,12 +74,12 @@ def run():
 
 	try:
 		os.mkdir(instance_dir)	#throws an exception caught by outer level if already exists
-		shutil.copy("../template/scripts_new.js", instance_dir)
+		shutil.copy("template/scripts_new.js", instance_dir)
 		copyIndex(instance_dir, spreadsheet_key)	#copy and edit
-		shutil.copy("../template/svgStyling.css", instance_dir)
-		shutil.copy("../template/style.css", instance_dir)
-		shutil.copy("../template/.htaccess", instance_dir)
-		shutil.copytree("../template/res", os.path.join(instance_dir, "res"))
+		shutil.copy("template/svgStyling.css", instance_dir)
+		shutil.copy("template/style.css", instance_dir)
+		shutil.copy("template/.htaccess", instance_dir)
+		shutil.copytree("template/res", os.path.join(instance_dir, "res"))
 	except Exception:
 		if verbose:
 			print("Directory exists, resuming")	
