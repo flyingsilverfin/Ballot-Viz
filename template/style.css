@@ -178,16 +178,14 @@ Not having it as pixels prevents people from zooming in to see more detail I thi
 #tooltip {
 	position:absolute;
 	pointer-events: none;
-	border: 2px solid white;
 	border-radius: 6px;
-	background: #E0E0E0;
-	background: linear-gradient(to bottom, #6D6D6D 0%, #000 100%) repeat scroll 0% 0% transparent;
+	background: #101010 ;
 	visibility: hidden;
 	font-size: 1.25em;
 	z-index: 5;
 	padding: 17px;
 	color: white;
-	
+
 	-webkit-box-shadow: 0px 0px 25px -2px rgba(43,43,43,1);
 	-moz-box-shadow: 0px 0px 25px -2px rgba(43,43,43,1);
 	box-shadow: 0px 0px 25px -2px rgba(43,43,43,1);

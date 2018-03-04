@@ -31,11 +31,11 @@ SITES = [
 ] 
 
 def to_date(date_string):
-	return datetime.strptime(date_string[:10], '%Y-%m-%d')
+	return datetime.strptime(date_string[:19], '%Y-%m-%dT%H:%M:%S')
 
 def copyIndex(dest, key):
 	fIn = open("template/index.html")
-	fOut = open(os.path.join(dest, 'index.html', "w"))
+	fOut = open(os.path.join(dest, 'index.html'), "w")
 	for line in fIn:
 		if "REPLACE_THIS_WITH_KEY" in line:
 			line = line.replace("REPLACE_THIS_WITH_KEY", key)
@@ -48,6 +48,7 @@ def run():
 	config = json.load(open('backend/config/config.json'))
 	ballot_doc_columns = config['ballot_document_columns']
 	name_index = ballot_doc_columns['roomName']
+	print(name_index)
 
 	year = config['year']
 	name = str(year)
@@ -69,10 +70,14 @@ def run():
 
 	spreadsheet_key = doc.id
 
-	last_update = to_date(doc.updated)
-
 	try:
 		os.mkdir(instance_dir)	#throws an exception caught by outer level if already exists
+		shutil.copy("template/scripts_new.js", instance_dir)
+		copyIndex(instance_dir, spreadsheet_key)	#copy and edit
+		shutil.copy("template/svgStyling.css", instance_dir)
+		shutil.copy("template/style.css", instance_dir)
+		shutil.copy("template/.htaccess", instance_dir)
+		shutil.copytree("template/res", os.path.join(instance_dir, "res"))
 		init = True
 	except Exception:
 		init = False
@@ -80,14 +85,8 @@ def run():
 			print("Directory exists, resuming")	
 	
 	
-	shutil.copy("template/scripts_new.js", instance_dir)
-	copyIndex(instance_dir, spreadsheet_key)	#copy and edit
-	shutil.copy("template/svgStyling.css", instance_dir)
-	shutil.copy("template/style.css", instance_dir)
-	shutil.copy("template/.htaccess", instance_dir)
-	shutil.copytree("template/res", os.path.join(instance_dir, "res"))
 
-	ballotDocument = BallotSpreadsheet(name_index)
+	ballotDocument = BallotSpreadsheet(name_index, ballot_doc_columns)
 	roomTranslator = RoomTranslator('backend/config/room_id_mapping.csv')
 	jsonSiteWriter = JSONFileWriter(instance_dir)
 	sites_data = {}
@@ -96,22 +95,31 @@ def run():
 	for site in SITES:
 		sites_data[site] = SiteDataHolder(site, ballotDocument, roomTranslator)
 
+	last_update = to_date(doc.updated)
 	while True:
 		time.sleep(5)
 		if verbose:
 			print("\n*Polling online spreadsheet")
 
-		if init or to_date(doc.updated) <= last_update:
+		print(init)
+		print(to_date(doc.updated))
+		print(last_update)
+		print(to_date(doc.updated) <= last_update)
+		if not init and to_date(doc.updated) <= last_update:
 			continue
-
+		init = False
 		last_update = to_date(doc.updated)
+
 		if verbose:
 			print("Pulling new changes")
 		
 
 		# update class-representation of the google doc (legacy adapted)
 		for row in sheet.get_all_values():
-			if ballotDocument.hasKey(row[name_index]):
+			room_name = row[name_index]
+			if not roomTranslator.is_valid_room(room_name):
+				continue
+			if ballotDocument.hasKey(room_name):
 				if ballotDocument.hasBeenUpdated(row):
 					ballotDocument.update(row)
 			else:
@@ -121,7 +129,7 @@ def run():
 			siteUpdated = sites_data[site].update()
 			print("Site " + site + " has changed: " + str(siteUpdated))
 			if siteUpdated:
-				self.jsonSiteWriter.writeJSONFile(site, sites_data[site].getJSONString())
+				jsonSiteWriter.writeJSONFile(site, sites_data[site].getJSONString())
 		print("\n")
 		time.sleep(5)
 
@@ -133,9 +141,10 @@ def run():
 #like ["BBC A01", 'BS', '\xc2\xa3106.96', 'Cooper', 'Domy', 'crsid', 'Easter', ''],
 #the row layout is as set in BALLOT_DOCUMENT_COLS
 class BallotSpreadsheet:
-	def __init__(self, name_index):
+	def __init__(self, name_index, columns):
 		self.data = {}
 		self.name_index = name_index
+		self.columns = columns
 		
 	def hasKey(self, key):
 		for keys in self.data:
@@ -150,8 +159,8 @@ class BallotSpreadsheet:
 				
 	def toAttrDictionary(self, row):
 		attrs = {}
-		for attr in ballot_doc_columns:
-			attrs[attr] = row[ballot_doc_columns[attr]]
+		for attr in self.columns:
+			attrs[attr] = row[self.columns[attr]]
 		return attrs
 	
 	def addRow(self, row):
@@ -227,6 +236,10 @@ class RoomTranslator:
 			#do it in reverse for now... not sure which way is better
 			self.data[d[0]] = d[1]
 	
+
+	def is_valid_room(self, name):
+		return name in self.data.values()
+
 	def convertSVGId(self, id):
 		if id in self.data:
 			return self.data[id]
