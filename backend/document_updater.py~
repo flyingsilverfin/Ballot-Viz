@@ -79,7 +79,7 @@ def run():
 		if verbose:
 			print("Directory exists, resuming")	
 	
-	
+
 	shutil.copy("template/scripts_new.js", instance_dir)
 	copyIndex(instance_dir, spreadsheet_key)	#copy and edit
 	shutil.copy("template/svgStyling.css", instance_dir)
