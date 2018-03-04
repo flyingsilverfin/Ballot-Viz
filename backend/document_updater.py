@@ -84,7 +84,7 @@ def run():
 		if verbose:
 			print("Directory exists, resuming")	
 	
-	ballotDocument = BallotSpreadsheet()
+	ballotDocument = BallotSpreadsheet(name_index)
 	roomTranslator = RoomTranslator('config/room_id_mapping.csv')
 	jsonSiteWriter = JSONFileWriter(instance_dir)
 	sites_data = {}
