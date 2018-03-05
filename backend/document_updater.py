@@ -82,9 +82,9 @@ def run():
 		shutil.copy("template/style.css", instance_dir)
 		shutil.copy("template/.htaccess", instance_dir)
 		shutil.copytree("template/res", os.path.join(instance_dir, "res"))
-		init = True
+		init = True # just in case...
 	except Exception:
-		init = False
+		init = True
 		if verbose:
 			print("Directory exists, resuming")	
 	
@@ -115,7 +115,6 @@ def run():
 		print(to_date(doc.updated) <= last_update)
 		if not init and to_date(doc.updated) <= last_update:
 			continue
-		init = False
 		last_update = to_date(doc.updated)
 
 		if verbose:
@@ -136,8 +135,9 @@ def run():
 		for site in sites_data:
 			siteUpdated = sites_data[site].update()
 			print("Site " + site + " has changed: " + str(siteUpdated))
-			if siteUpdated:
+			if siteUpdated or init:
 				jsonSiteWriter.writeJSONFile(site, sites_data[site].getJSONString())
+		init = False
 		print("\n")
 
 
