@@ -10,6 +10,7 @@ Further rewrite are needed/possible:
   * `pip install gspread oauth2client`
   * Note: currently on python2 for pip usage
   * clone this repository
+  * Add the google API key (should already be there if already set up)
   * Check permissions on shared servers (srcf), especially the google api authorization
   * That's it!
   
