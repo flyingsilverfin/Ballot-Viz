@@ -54,10 +54,10 @@ def run():
 	name = str(year)
 
 	try:
-		os.mkdir('ballot')
+		os.mkdir('./ballot')
 	except Exception:
 		pass
-	instance_dir = os.path.join('ballot', name)
+	instance_dir = os.path.join('./ballot', name)
 
 	print("Starting ballot: ", instance_dir)
 
@@ -102,6 +102,10 @@ def run():
 	last_update = to_date(doc.updated)
 	while True:
 		time.sleep(5)
+		documents = client.openall()
+		documents.sort(key=lambda s: to_date(s.updated), reverse=True)
+		doc = documents[0]
+		sheet = doc.worksheets()[0]
 		if verbose:
 			print("\n*Polling online spreadsheet")
 
@@ -135,7 +139,6 @@ def run():
 			if siteUpdated:
 				jsonSiteWriter.writeJSONFile(site, sites_data[site].getJSONString())
 		print("\n")
-		time.sleep(5)
 
 
 # *** everything below here is from prior version and could be redone ***
