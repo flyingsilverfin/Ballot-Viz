@@ -53,6 +53,10 @@ def run():
 	year = config['year']
 	name = str(year)
 
+	try:
+		os.mkdir('ballot')
+	except Exception:
+		pass
 	instance_dir = os.path.join('ballot', name)
 
 	print("Starting ballot: ", instance_dir)
