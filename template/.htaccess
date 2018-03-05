@@ -1,2 +1,3 @@
-AuthType Ucam-WebAuth
-Require valid-user
+order deny, allow
+deny from all
+
