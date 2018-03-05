@@ -16,4 +16,6 @@ Further rewrite are needed/possible:
 ## How to use
 * Share the balloting spreadsheet to `editor@thjcr-ballot-system.iam.gserviceaccount.com`
 * The `backend/config/config.json` file is manipulated by an administrator, approved by setting CRSIDs in the .htaccess in backend/
+* Start a screen/tmux session
 * Run with `python backend/document_updater.py` which consumes the config file and creates a directory for the year/name defined in the configuration
+
