@@ -9,5 +9,6 @@
 		"year" : 8,
 		"license" : 9
 	},
-	"year": 2018
+	"year": 2018,
+	"only_init": false
 }

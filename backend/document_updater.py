@@ -48,7 +48,8 @@ def run():
 	config = json.load(open('backend/config/config.json'))
 	ballot_doc_columns = config['ballot_document_columns']
 	name_index = ballot_doc_columns['roomName']
-	print(name_index)
+
+	only_init = config['only_init']
 
 	year = config['year']
 	name = str(year)
@@ -59,7 +60,25 @@ def run():
 		pass
 	instance_dir = os.path.join('./ballot', name)
 
+
+	if only_init:
+		try:
+			os.mkdir(instance_dir)	#throws an exception caught by outer level if already exists
+			shutil.copy("template/scripts_new.js", instance_dir)
+			copyIndex(instance_dir, "-1")	#copy and edit
+			shutil.copy("template/svgStyling.css", instance_dir)
+			shutil.copy("template/style.css", instance_dir)
+			shutil.copy("template/.htaccess", instance_dir)
+			shutil.copytree("template/res", os.path.join(instance_dir, "res"))
+		except Exception:
+			if verbose:
+				print("Directory exists, exiting resuming")
+		print("Finished copying files in only_init mode, exiting")
+		return
+
+
 	print("Starting ballot: ", instance_dir)
+
 
 	# use creds to create a client to interact with the Google Drive API
 	scope = ['https://spreadsheets.google.com/feeds']

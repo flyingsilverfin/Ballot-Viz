@@ -20,3 +20,4 @@ Further rewrite are needed/possible:
 * Start a screen/tmux session
 * Run with `python backend/document_updater.py` which consumes the config file and creates a directory for the year/name defined in the configuration
 
+* If the ballot goolge doc is not available yet, set the "only_init" flag in `config.json` to true
