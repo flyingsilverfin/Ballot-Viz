@@ -234,7 +234,7 @@ function showTooltip(elem, site, room) {
 	var imTop = im.getBoundingClientRect().top;
 	document.getElementById("room").innerHTML = roomData.roomName;
 	document.getElementById("occupant").innerHTML = roomData.occupier;
-	if (roomData.occupier.trim().length > 0) {
+	if (roomData.occupierCrsid.trim().length > 0) {
 		document.getElementById("crsid").innerHTML = "("+roomData.occupierCrsid+")";
 	} else {
 		document.getElementById("crsid").innerHTML = ""
