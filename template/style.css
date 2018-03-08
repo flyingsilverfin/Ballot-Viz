@@ -130,8 +130,8 @@ Not having it as pixels prevents people from zooming in to see more detail I thi
 	position:absolute;
 	margin-left:20%;
 	width: 80%;
-	height: calc(100% - 124px);
-	top:124px;
+	height: calc(100% - 104px);
+	top:104px;
 	background-color: #E0E0E0;
 }
 
@@ -149,6 +149,7 @@ Not having it as pixels prevents people from zooming in to see more detail I thi
 	background-color:white;
 	border:2px solid #818181;
 	border-radius:6px;
+	margin:5px;
 }
 
 #control_group {
