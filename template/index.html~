@@ -138,7 +138,7 @@
 		<div id="control_group">
 			<input type="image" class="control_button" id="zoom_in" src="res/zoom_in.png" onclick="zoomIn()" />
 			<input type="image" class="control_button" id="zoom_out" src="res/zoom_out.png" onClick="zoomOut()" />
-			<input type="image" class="control_button" id="zoom_reset" src="res/refresh.gif" onClick="zoomReset()" />
+			<input type="image" class="control_button" id="zoom_reset" src="res/reset.png" onClick="zoomReset()" />
 		<!--	
 			<input type="image" class="control_button" id="ccw_rotate" src="res/ccw_rotate.png" />
 			<input type="image" class="control_button" id="cw_rotate" src="res/cw_rotate.png" />

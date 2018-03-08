@@ -285,7 +285,7 @@ function zoomOut() {
 }
 
 var orig_width;
-function zoomReset() {
+function resetZoom() {
 	var im = document.getElementById("svg_image");
 	im.width = orig_width;
 }
