@@ -181,7 +181,7 @@ Not having it as pixels prevents people from zooming in to see more detail I thi
 	border-radius: 6px;
 	background: #101010 ;
 	visibility: hidden;
-	font-size: 1.25em;
+	font-size: 1.00em;
 	z-index: 5;
 	padding: 17px;
 	color: white;
@@ -189,7 +189,19 @@ Not having it as pixels prevents people from zooming in to see more detail I thi
 	-webkit-box-shadow: 0px 0px 25px -2px rgba(43,43,43,1);
 	-moz-box-shadow: 0px 0px 25px -2px rgba(43,43,43,1);
 	box-shadow: 0px 0px 25px -2px rgba(43,43,43,1);
+}
 
+#tooltip .label {
+	font-weight: bold;
+	float: left;
+	clear: both;
+}
+
+#tooltip .data {
+	float:right;
+	margin-left: 15px;
+	max-width:225px;
+	text-align: right;
 }
 
 #tooltip #room {

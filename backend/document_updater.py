@@ -192,7 +192,11 @@ class BallotSpreadsheet:
 	def toAttrDictionary(self, row):
 		attrs = {}
 		for attr in self.columns:
-			attrs[attr] = row[self.columns[attr]]
+			index = self.columns[attr]
+			if index == -1: 	# signal values to ignore
+				attrs[attr] = ''  #but this attr may be hard coded in somewhere...
+			else:
+				attrs[attr] = row[self.columns[attr]]
 		return attrs
 	
 	def addRow(self, row):
@@ -250,6 +254,15 @@ class BallotSpreadsheet:
 	def getContractType(self, key):
 		d = self.getKey(key)
 		return d['license']
+
+
+	def getFloor(self, name):
+		d = self.getKey(name)
+		return d['floor']
+
+	def getNotes(self, name):
+		d = self.getKey(name)
+		return d['notes']
 	
 	def printContents(self):
 		for key in self.data:
@@ -330,10 +343,13 @@ class SiteDataHolder:
 			info['roomPrice'] = self.ballotDocument.getWeeklyRent(ballotRoomName)
 #			info.append(self.ballotDocument.getWeeklyRent(ballotRoomName))
 			info['contractType'] = self.ballotDocument.getContractType(ballotRoomName)
-#			info.append(self.ballotDocument.getContractType(ballotRoomName))
+#			info.append(self.ballotDocument.getContractT	pe(ballotRoomName))
 			info['roomType'] = self.ballotDocument.getRoomType(ballotRoomName)
 #			info.append(self.ballotDocument.getRoomType(ballotRoomName))
 			info['fullCost'] = self.ballotDocument.getFullCostString(ballotRoomName)
+
+			info['floor'] = self.ballotDocument.getFloor(ballotRoomName)
+			info['notes'] = self.ballotDocument.getNotes(ballotRoomName)
 			return info
 		else:
 			info = { 'status' : "unavailable"}

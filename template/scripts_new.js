@@ -234,10 +234,18 @@ function showTooltip(elem, site, room) {
 	var imTop = im.getBoundingClientRect().top;
 	document.getElementById("room").innerHTML = roomData.roomName;
 	document.getElementById("occupant").innerHTML = roomData.occupier;
-	document.getElementById("crsid").innerHTML = "("+roomData.occupierCrsid+")";
+	if (roomData.occupier.trim().length > 0) {
+		document.getElementById("crsid").innerHTML = "("+roomData.occupierCrsid+")";
+	} else {
+		document.getElementById("crsid").innerHTML = ""
+	}
+
+		
 	document.getElementById("contract_type").innerHTML = roomData.contractType;
 	document.getElementById("rent").innerHTML = "&pound;"+roomData.roomPrice;
 	document.getElementById("room_type").innerHTML = roomData.roomType;
+	document.getElementById("floor").innerHTML = roomData.floor;
+	document.getElementById("notes").innerHTML = roomData.notes;
 	if (roomData.fullCost.indexOf("\n") != -1) {
 		var s = roomData.fullCost.split("\n");
 		document.getElementById("total_cost_1").innerHTML = s[0];

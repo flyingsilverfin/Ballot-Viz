@@ -64,10 +64,10 @@ cs_1_s_10b,CS S10A
 cs_2_s_11,
 cs_2_s_12,
 cs_2_s_13,
-cs_2_s_14a,
-cs_2_s_14b,
-cs_2_s_15a,
-cs_2_s_15b,
+cs_2_s_14a,CS S14A
+cs_2_s_14b,CS S14B
+cs_2_s_15a,CS S15A
+cs_2_s_15b,CS S15B
 cs_2_a_1,CS A01
 cs_2_a_2a,CS A02A
 cs_2_a_2b,CS A02B
