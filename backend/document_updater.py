@@ -76,9 +76,6 @@ def run():
 			documents.sort(key=lambda s: to_date(s.updated), reverse=True)
 			doc = documents[0]
 		
-			print(documents, doc)
-			print(doc.worksheets())
-		
 			for s in doc.worksheets():
 				if sheet_name == s.title:
 					return s, doc
@@ -130,13 +127,8 @@ def run():
 	while True:
 		time.sleep(5)
 		sheet, doc = get_sheet()
-		if verbose:
-			print("\n*Polling online spreadsheet")
+		print("\n*Polling online spreadsheet", doc)
 
-		print(init)
-		print(to_date(doc.updated))
-		print(last_update)
-		print(to_date(doc.updated) <= last_update)
 		if not init and to_date(doc.updated) <= last_update:
 			continue
 		last_update = to_date(doc.updated)
@@ -147,7 +139,6 @@ def run():
 
 		# update class-representation of the google doc (legacy adapted)
 		for row in sheet.get_all_values():
-			print(row)
 			room_name = row[name_index]
 			if not roomTranslator.is_valid_room(room_name):
 				continue
@@ -159,7 +150,6 @@ def run():
 
 		for site in sites_data:
 			siteUpdated = sites_data[site].update()
-			print("Site " + site + " has changed: " + str(siteUpdated))
 			if siteUpdated or init:
 				jsonSiteWriter.writeJSONFile(site, sites_data[site].getJSONString())
 		init = False
@@ -232,8 +222,6 @@ class BallotSpreadsheet:
 			return "30 weeks: &pound;" + str(float(self.getWeeklyRent(key).strip())*30)
 		else: #calculate both easter and yearly cost
 			
-			print(key)
-			print(self.getWeeklyRent(key).strip())
 			#note on calculation: during the holidays, so for about 25 days each holiday, you pay 80% of the cost
 			s = "30 week: ~&pound;" + str(float(self.getWeeklyRent(key).strip())*30)
 			s += "\nEaster: ~&pound;" + str(round(float(self.getWeeklyRent(key).strip())*(30 + 0.8 * 3.5),2))
@@ -394,5 +382,5 @@ class JSONFileWriter:
 
 
 if __name__ == "__main__":
-	verbose = True
+	verbose = False 
 	run()
