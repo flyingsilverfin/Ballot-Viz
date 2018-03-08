@@ -1,14 +1,17 @@
 {
 	"ballot_document_columns": {
-		"roomName" : 0,
-		"roomType" : 1,
-		"weeklyRent" : 4,
-		"surname" : 5,
-		"name" : 6,
-		"crsid" : 7,
-		"year" : 8,
-		"license" : 9
+		"roomName" : 4,
+		"roomType" : 5,
+		"floor": 6,
+		"notes": 7,
+		"weeklyRent" : 8,
+		"surname" : 9,
+		"name" : 10,
+		"crsid" : 11,
+		"year" : 12,
+		"license" : 13 
 	},
 	"year": 2018,
-	"only_init": false
+	"only_init": false,
+	"sheet_name": "2018 Room list"
 }

@@ -50,6 +50,7 @@ def run():
 	name_index = ballot_doc_columns['roomName']
 
 	only_init = config['only_init']
+	sheet_name = config['sheet_name']
 
 	year = config['year']
 	name = str(year)
@@ -61,53 +62,59 @@ def run():
 	instance_dir = os.path.join('./ballot', name)
 
 
+
+	if not only_init:
+		# use creds to create a client to interact with the Google Drive API
+		scope = ['https://spreadsheets.google.com/feeds']
+		creds = ServiceAccountCredentials.from_json_keyfile_name('backend/config/google_api_secret.json', scope)
+		client = gspread.authorize(creds)
+		
+	
+		def get_sheet():
+			# get the most recently edited spreadsheet as the current one
+			documents = client.openall()
+			documents.sort(key=lambda s: to_date(s.updated), reverse=True)
+			doc = documents[0]
+		
+			print(documents, doc)
+			print(doc.worksheets())
+		
+			for s in doc.worksheets():
+				if sheet_name == s.title:
+					return s, doc
+	
+		sheet, doc = get_sheet()
+		spreadsheet_key = doc.id
+	else:
+		spreadsheet_key = -1
+
+	
+	# delete all the existing files and just copy over from scratch
+	# in init-only we wrote a -1 to the ID...
+	
+	try:
+		shutil.rmtree(instance_dir)
+	except Exception:
+		pass
+	try:
+		os.mkdir(instance_dir)	#throws an exception caught by outer level if already exists
+		shutil.copy("template/scripts_new.js", instance_dir)
+		copyIndex(instance_dir, spreadsheet_key )	#copy and edit
+		shutil.copy("template/svgStyling.css", instance_dir)
+		shutil.copy("template/style.css", instance_dir)
+		shutil.copy("template/.htaccess", instance_dir)
+		shutil.copytree("template/res", os.path.join(instance_dir, "res"))
+	except Exception:
+		if verbose:
+			print("File or Directory exists/error, continuing")
+
 	if only_init:
-		try:
-			os.mkdir(instance_dir)	#throws an exception caught by outer level if already exists
-			shutil.copy("template/scripts_new.js", instance_dir)
-			copyIndex(instance_dir, "-1")	#copy and edit
-			shutil.copy("template/svgStyling.css", instance_dir)
-			shutil.copy("template/style.css", instance_dir)
-			shutil.copy("template/.htaccess", instance_dir)
-			shutil.copytree("template/res", os.path.join(instance_dir, "res"))
-		except Exception:
-			if verbose:
-				print("Directory exists, exiting resuming")
 		print("Finished copying files in only_init mode, exiting")
 		return
 
 
 	print("Starting ballot: ", instance_dir)
 
-
-	# use creds to create a client to interact with the Google Drive API
-	scope = ['https://spreadsheets.google.com/feeds']
-	creds = ServiceAccountCredentials.from_json_keyfile_name('backend/config/google_api_secret.json', scope)
-	client = gspread.authorize(creds)
-	 
-	# get the most recently edited spreadsheet as the current one
-	documents = client.openall()
-	documents.sort(key=lambda s: to_date(s.updated), reverse=True)
-	doc = documents[0]
-	sheet = doc.worksheets()[0]
-
-	spreadsheet_key = doc.id
-
-	try:
-		os.mkdir(instance_dir)	#throws an exception caught by outer level if already exists
-		shutil.copy("template/scripts_new.js", instance_dir)
-		copyIndex(instance_dir, spreadsheet_key)	#copy and edit
-		shutil.copy("template/svgStyling.css", instance_dir)
-		shutil.copy("template/style.css", instance_dir)
-		shutil.copy("template/.htaccess", instance_dir)
-		shutil.copytree("template/res", os.path.join(instance_dir, "res"))
-		init = True # just in case...
-	except Exception:
-		init = True
-		if verbose:
-			print("Directory exists, resuming")	
-	
-	
 
 	ballotDocument = BallotSpreadsheet(name_index, ballot_doc_columns)
 	roomTranslator = RoomTranslator('backend/config/room_id_mapping.csv')
@@ -119,12 +126,10 @@ def run():
 		sites_data[site] = SiteDataHolder(site, ballotDocument, roomTranslator)
 
 	last_update = to_date(doc.updated)
+	init = True
 	while True:
 		time.sleep(5)
-		documents = client.openall()
-		documents.sort(key=lambda s: to_date(s.updated), reverse=True)
-		doc = documents[0]
-		sheet = doc.worksheets()[0]
+		sheet, doc = get_sheet()
 		if verbose:
 			print("\n*Polling online spreadsheet")
 
@@ -142,6 +147,7 @@ def run():
 
 		# update class-representation of the google doc (legacy adapted)
 		for row in sheet.get_all_values():
+			print(row)
 			room_name = row[name_index]
 			if not roomTranslator.is_valid_room(room_name):
 				continue
@@ -221,6 +227,9 @@ class BallotSpreadsheet:
 		if 'term' in contract.lower():
 			return "30 weeks: &pound;" + str(float(self.getWeeklyRent(key).strip())*30)
 		else: #calculate both easter and yearly cost
+			
+			print(key)
+			print(self.getWeeklyRent(key).strip())
 			#note on calculation: during the holidays, so for about 25 days each holiday, you pay 80% of the cost
 			s = "30 week: ~&pound;" + str(float(self.getWeeklyRent(key).strip())*30)
 			s += "\nEaster: ~&pound;" + str(round(float(self.getWeeklyRent(key).strip())*(30 + 0.8 * 3.5),2))
@@ -282,6 +291,8 @@ class RoomTranslator:
 		for room in self.data:
 			if room.startswith(site):
 				yield room
+	
+
 			
 			
 """
