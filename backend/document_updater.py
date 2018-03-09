@@ -67,9 +67,12 @@ def run():
 		# use creds to create a client to interact with the Google Drive API
 		scope = ['https://spreadsheets.google.com/feeds']
 		creds = ServiceAccountCredentials.from_json_keyfile_name('backend/config/google_api_secret.json', scope)
-		client = gspread.authorize(creds)
 		
-	
+		def authorize():
+			return gspread.authorize(creds)
+
+		client = authorize()
+
 		def get_sheet():
 			# get the most recently edited spreadsheet as the current one
 			documents = client.openall()
@@ -124,6 +127,8 @@ def run():
 
 	last_update = to_date(doc.updated)
 	init = True
+	last_auth = datetime.now()
+
 	while True:
 		time.sleep(5)
 		sheet, doc = get_sheet()
@@ -154,6 +159,10 @@ def run():
 				jsonSiteWriter.writeJSONFile(site, sites_data[site].getJSONString())
 		init = False
 		print("\n")
+
+		if (datetime.now() - last_auth).total_seconds() > 30 * 60:
+			client = authorize()
+			last_auth = datetime.now()
 
 
 # *** everything below here is from prior version and could be redone ***
