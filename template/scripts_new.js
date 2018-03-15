@@ -122,7 +122,7 @@ function updateSite(site) {
 		httpRequest.onreadystatechange = function(request, site, prefixIndex) {
 			return function() {
 				var priorEtag = sites[site].sitePrefixes[prefixIndex].etag;
-				if (request.readyState == 4 && request.status == 200 && priorEtag != request.getResponseHeader("etag")) {
+				if (request.readyState == 4 && request.status == 200){ // && priorEtag != request.getResponseHeader("etag")) {
 					updatedData(site, JSON.parse(request.response));
 					sites[site].sitePrefixes[prefixIndex].etag = request.getResponseHeader("etag");
 				}

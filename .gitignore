@@ -3,3 +3,6 @@ lib/
 include/
 NO_COMMIT/
 backend/config/google_api_secret.json
+.*.sw?
+.*~
+*~
