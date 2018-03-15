@@ -18,7 +18,7 @@ from datetime import datetime
 import httplib2 # for hacky token refresh 
 
 #these are prefixes in the room_id_translation.csv file
-#each prefix generates one .json file in ./data
+# these are toplevel json keys
 SITES = [
 	"bbc_a", "bbc_b", "bbc_c",
 	"cs_1", "cs_2",
@@ -119,11 +119,8 @@ def run():
 	ballotDocument = BallotSpreadsheet(name_index, ballot_doc_columns)
 	roomTranslator = RoomTranslator('backend/config/room_id_mapping.csv')
 	jsonSiteWriter = JSONFileWriter(instance_dir)
-	sites_data = {}
+	sites_data = SitesData(SITES, ballotDocument, roomTranslator)
 
-	#set up site data holders
-	for site in SITES:
-		sites_data[site] = SiteDataHolder(site, ballotDocument, roomTranslator)
 
 	last_update = to_date(doc.updated)
 	init = True
@@ -161,11 +158,11 @@ def run():
 			else:
 				ballotDocument.addRow(row)
 
-		for site in sites_data:
-			siteUpdated = sites_data[site].update()
-			if siteUpdated or init:
-				print("Update site: ", site)
-				jsonSiteWriter.writeJSONFile(site, sites_data[site].getJSONString())
+                updated = sites_data.update()
+                if updated or init:
+                    # only 1 JSON file now
+                    jsonSiteWriter.writeJSONFile("data", sites_data.getJSONString())
+
 		init = False
 
 
@@ -308,7 +305,25 @@ class RoomTranslator:
 				yield room
 	
 
-			
+
+class SitesData:
+    def __init__(self, sitenames, ballot_doc, room_translator):
+        self.data = {}
+        for site in sitenames:
+            self.data[site] = SiteDataHolder(site, ballot_doc, room_translator)
+
+    # returns if any have updated
+    def update(self):
+        updated = False 
+        for site in self.data:
+            updated = updated and site.update()
+        return updated
+
+    def get_json_string(self):
+        d = {}
+        for site in self.data:
+            d[site.site] = site.get_JSON()
+        return json.dumps(d)
 			
 """
 This will duplicate all the data. Might rewrite later but good enough for now
@@ -373,7 +388,11 @@ class SiteDataHolder:
 				updated = True
 				self.rooms[room] = info
 		return updated
-				
+			
+
+        def get_JSON(self):
+            return self.rooms
+
 	def getJSONString(self):
 		if verbose:
 			print(self.rooms)

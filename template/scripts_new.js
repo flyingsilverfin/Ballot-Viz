@@ -105,14 +105,21 @@ function loaded() {
 	im.width = container.clientWidth;
 	loadSVG(document.getElementById(currentlySelected));
 	updateAll();
-	recurInterval = setInterval(updateAll, 30000);	
+	recurInterval = setInterval(updateAll, 50000);	
 }
 
 function updateAll() {
-	for (var site in sites) {
-		//console.log("going to update: " + site);
-		updateSite(site);
-	}
+
+    var request = new XMLHttpRequest();
+    request.onreadystatechange = function() {
+        if (request.readyState == 4 && request.status == 200) {
+            data = JSON.parse(request.response);
+            updatedData(data)
+        }
+    }
+        
+    httpRequest.open("GET", "data/data.json", true);
+    httpRequest.send();
 }
 
 function updateSite(site) {
@@ -134,9 +141,11 @@ function updateSite(site) {
 	}
 }
 
-//this gets called when we know the data has changed
-function updatedData(site, roomsJSON) {
-	var roomsUpdated = updateAndGetDifferencesFor(site, roomsJSON);
+// this gets called when we know the data has changed
+function updatedData(data) {
+    for (let site in data) {
+        site_data = data[site];
+        let roomsUpdated = updateAndGetDifferencesFor(site, roomsJSON);
 	console.log("Rooms updated for site: " +site);
 	console.log(roomsUpdated);
 	if (Object.keys(roomsUpdated).length > 0) {
@@ -149,6 +158,7 @@ function updatedData(site, roomsJSON) {
 			//notifier.parentElement.title = "has changes";
 		}
 	}
+    }
 }
 
 
