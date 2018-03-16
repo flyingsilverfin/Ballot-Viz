@@ -315,14 +315,16 @@ class SitesData:
     # returns if any have updated
     def update(self):
         updated = False 
-        for site in self.data:
-            updated = updated and site.update()
+        for site in self.data.values():
+	    b = site.update()
+            updated = updated or b
         return updated
 
     def get_json_string(self):
         d = {}
-        for site in self.data:
-            d[site.site] = site.get_JSON()
+        for site_name in self.data:
+	    site = self.data[site_name]
+            d[site_name] = site.get_JSON()
         return json.dumps(d)
 			
 """

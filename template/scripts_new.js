@@ -118,8 +118,8 @@ function updateAll() {
         }
     }
         
-    httpRequest.open("GET", "data/data.json", true);
-    httpRequest.send();
+    request.open("GET", "data/data.json", true);
+    request.send();
 }
 
 function updateSite(site) {
@@ -145,7 +145,7 @@ function updateSite(site) {
 function updatedData(data) {
     for (let site in data) {
         site_data = data[site];
-        let roomsUpdated = updateAndGetDifferencesFor(site, roomsJSON);
+        let roomsUpdated = updateAndGetDifferencesFor(site, site_data);
 	console.log("Rooms updated for site: " +site);
 	console.log(roomsUpdated);
 	if (Object.keys(roomsUpdated).length > 0) {
