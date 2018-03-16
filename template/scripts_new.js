@@ -49,7 +49,7 @@ var sites  = {
 		roomData : [],
 		sitePrefixes : [{'prefix':"boho_c", 'etag':-1}] //list of room ID prefixes in this site, corresponding to one remote .json
 	},
-	"new_build-a" : {
+	"new_build_a" : {
 		sitePlanRes : 'new-build-a-stair_combined.svg',		
 		etag : -1, //for caching
 		roomData : [],
@@ -143,22 +143,27 @@ function updateSite(site) {
 
 // this gets called when we know the data has changed
 function updatedData(data) {
-    for (let site in data) {
-        site_data = data[site];
-        let roomsUpdated = updateAndGetDifferencesFor(site, site_data);
-	console.log("Rooms updated for site: " +site);
-	console.log(roomsUpdated);
-	if (Object.keys(roomsUpdated).length > 0) {
-		notify(roomsUpdated);
-		if (currentlySelected == site) {
-			updateSvgData(currentlySelected);
-		} else {
-			//var notifier = document.getElementById(site).getElementsByClassName("indicator")[0];
-			//notifier.style.backgroundColor = "blue";
-			//notifier.parentElement.title = "has changes";
-		}
+    for (let site in sites) {
+		for (let i = 0; i < sites[site].sitePrefixes.length; i++) {
+		    let site_prefix = sites[site].sitePrefixes[i].prefix;
+		    
+		    let prefix_data = data[site_prefix]
+		    let rooms_updated = updateAndGetDifferencesFor(site, prefix_data);
+	
+	        console.log("Rooms updated for site: " +site_prefix);
+	       	console.log(rooms_updated);
+	       	if (Object.keys(rooms_updated).length > 0) {
+	       		notify(rooms_updated);
+	       		if (currentlySelected == site) {
+	       			updateSvgData(currentlySelected);
+	       		} else {
+	       			//var notifier = document.getElementById(site).getElementsByClassName("indicator")[0];
+	       			//notifier.style.backgroundColor = "blue";
+	       			//notifier.parentElement.title = "has changes";
+	       		}
+	       	}
+	    }
 	}
-    }
 }
 
 
