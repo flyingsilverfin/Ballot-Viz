@@ -161,7 +161,7 @@ def run():
                 updated = sites_data.update()
                 if updated or init:
                     # only 1 JSON file now
-                    jsonSiteWriter.writeJSONFile("data", sites_data.getJSONString())
+                    jsonSiteWriter.writeJSONFile("data", sites_data.get_json_string())
 
 		init = False
 
